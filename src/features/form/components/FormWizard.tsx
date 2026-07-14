@@ -110,7 +110,7 @@ export function FormWizard() {
       </header>
 
       {/* ─── Step Content ────────────────────────────────────────── */}
-      <main className="flex flex-1 items-start justify-center px-6 py-12 md:py-20">
+      <main className="flex flex-1 items-start justify-center px-6 pt-12 pb-32 md:pt-20 md:pb-40">
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div

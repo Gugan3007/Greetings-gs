@@ -304,13 +304,7 @@ function TimelineField({
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-foreground">
-        Timeline Milestones
-      </label>
-      <p className="text-xs text-fg-muted">
-        Add key moments from your journey together. Each milestone appears on an
-        interactive timeline.
-      </p>
+      {/* Removed redundant label and description since they are handled by the Step Header */}
 
       <AnimatePresence mode="popLayout">
         {milestones.map((milestone, i) => (
@@ -329,7 +323,7 @@ function TimelineField({
               style={{ background: accentColor }}
             />
 
-            <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:gap-3">
+            <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:gap-4">
               <input
                 type="date"
                 value={milestone.date}
@@ -350,7 +344,7 @@ function TimelineField({
             <button
               type="button"
               onClick={() => removeMilestone(i)}
-              className="mt-2 text-fg-muted transition-colors hover:text-accent-rose"
+              className="mt-2 sm:mt-0 text-fg-muted transition-colors hover:text-accent-rose self-start sm:self-center ml-2"
               aria-label="Remove milestone"
             >
               <Trash2 className="h-4 w-4" />

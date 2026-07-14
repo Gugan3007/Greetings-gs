@@ -172,7 +172,7 @@ export default function LandingPage() {
 
         <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {steps.map((step, i) => (
-            <Reveal key={step.title} delay={i * 0.15} direction="up">
+            <Reveal key={step.title} delay={i * 0.15} direction="up" className="h-full">
               <GlassCard
                 animatedBorder={i === 1}
                 padding="lg"
@@ -227,7 +227,7 @@ export default function LandingPage() {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, i) => (
-            <Reveal key={feature.title} delay={i * 0.1}>
+            <Reveal key={feature.title} delay={i * 0.1} className="h-full">
               <GlassCard padding="md" className="h-full group">
                 <feature.icon className="mb-4 h-8 w-8 text-accent-purple transition-colors group-hover:text-accent-purple-light" />
                 <h3 className="mb-2 text-lg font-semibold text-foreground">
@@ -243,8 +243,8 @@ export default function LandingPage() {
       </section>
 
       {/* ─── CTA Section ───────────────────────────────────────────────── */}
-      <section className="relative z-10 mx-auto max-w-4xl px-6 py-[var(--section-padding)]">
-        <Reveal scale={0.95} blur={8}>
+      <section className="relative z-10 mx-auto max-w-4xl px-6 py-[var(--section-padding)] mt-12 mb-20">
+        <Reveal scale={0.95} blur={8} className="h-full">
           <div className="animated-border rounded-[var(--radius-xl)] bg-bg-secondary p-10 text-center md:p-16">
             <Gift className="mx-auto mb-6 h-12 w-12 text-accent-purple" />
             <h2
