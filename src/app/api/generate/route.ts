@@ -9,8 +9,7 @@ import { greetingContentSchema, type GreetingContent } from '@/lib/ai/schema';
 import { buildSystemPrompt } from '@/lib/ai/prompt';
 import { createPersonalizedMock } from '@/lib/ai/mock';
 import { dedupeGreetingContent } from '@/lib/ai/dedupe';
-import { supabase } from '@/lib/supabase/client';
-import { saveGreeting } from '@/lib/greetings/store';
+import { persistGreeting } from '@/lib/greetings/repository';
 
 export const maxDuration = 60; // 60 seconds max duration for AI generation
 
@@ -72,24 +71,15 @@ export async function POST(req: Request) {
     }
 
     aiContent = dedupeGreetingContent(aiContent);
-    saveGreeting(slug, aiContent);
+    const persistence = await persistGreeting({
+      slug,
+      formData,
+      content: aiContent,
+      ownerToken,
+    });
 
-    // 3. Save to Supabase
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      const { error } = await supabase.from('greetings').insert({
-        slug,
-        form_data: formData,
-        ai_content: aiContent,
-        status: 'published',
-      });
-
-      if (error) {
-        console.error('Supabase insert error:', error);
-        // We'll still return success so the user can see it, but log the error
-      }
-    } else {
-      console.warn('⚠️ No NEXT_PUBLIC_SUPABASE_URL found. Skipping database insert.');
-      // In a real app we'd throw, but for local dev without DB we'll just return the mock slug
+    if (persistence === 'memory') {
+      console.warn('⚠️ Supabase is not configured. Greeting is available only while this server is running.');
     }
 
     // 4. Return the slug for redirect
