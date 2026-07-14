@@ -20,7 +20,7 @@ const subscribeSession = () => () => undefined;
 
 type GreetingResult = {
   slug: string;
-  mockContent: GreetingContent;
+  mockContent?: GreetingContent;
   ownerToken?: string;
   shareUrl?: string;
 };
@@ -46,7 +46,7 @@ export default function GreetingPage() {
   const [remoteMissing, setRemoteMissing] = useState(false);
 
   useEffect(() => {
-    if (sessionResult) return;
+    if (sessionResult?.mockContent) return;
     const controller = new AbortController();
 
     fetch(`/api/greetings/${encodeURIComponent(slug)}`, { signal: controller.signal })
@@ -62,7 +62,7 @@ export default function GreetingPage() {
     return () => controller.abort();
   }, [sessionResult, slug]);
 
-  const availableResult = sessionResult || remoteResult;
+  const availableResult = sessionResult?.mockContent ? sessionResult : remoteResult;
   const data = useMemo(() => {
     const content = availableResult?.mockContent || null;
     return content ? dedupeGreetingContent(content) : null;

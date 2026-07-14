@@ -98,7 +98,6 @@ export async function POST(req: Request) {
       slug,
       ownerToken,
       shareUrl: getShareUrl(req, slug),
-      mockContent: aiContent,
     });
 
   } catch (error) {
