@@ -108,7 +108,7 @@ export function CustomCursor() {
     <>
       {/* Main cursor dot */}
       <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-[10000] mix-blend-difference"
+        className="custom-cursor-layer pointer-events-none fixed top-0 left-0 z-[10000] mix-blend-difference"
         style={{
           x: cursorX,
           y: cursorY,
@@ -148,7 +148,7 @@ export function CustomCursor() {
       {/* Trail / glow */}
       <motion.div
         ref={trailRef}
-        className="pointer-events-none fixed top-0 left-0 z-[9999]"
+        className="custom-cursor-layer pointer-events-none fixed top-0 left-0 z-[9999]"
         style={{
           x: trailX,
           y: trailY,

@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { formSchema } from '@/features/form/schema';
 import { greetingContentSchema, type GreetingContent } from '@/lib/ai/schema';
 import { buildSystemPrompt } from '@/lib/ai/prompt';
+import { createPersonalizedMock } from '@/lib/ai/mock';
 import { supabase } from '@/lib/supabase/client';
 
 export const maxDuration = 60; // 60 seconds max duration for AI generation
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
 
     const formData = parsed.data;
     const slug = nanoid(10); // Generate unique URL slug
+    const ownerToken = nanoid(32);
 
     // TODO: Handle Image Uploads to Supabase Storage here
     // For now, we pass the data URIs through (or ignore them for the AI prompt)
@@ -37,28 +39,7 @@ export async function POST(req: Request) {
       // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 3000));
       
-      aiContent = {
-        recipientName: formData.recipientName,
-        heroHeadline: `To ${formData.recipientName}, the one who makes everything brighter.`,
-        greetingMessage: `This is a special celebration just for you.`,
-        story: `You are incredibly special. When I think of you, I think of ${formData.favoriteColor || 'bright'} colors and ${formData.favoriteFood || 'sweet'} moments. We've shared so much, especially that time ${formData.bestMoment || 'we laughed until we cried'}.`,
-        letter: formData.personalLetter || 'I love you so much!',
-        quotes: ['"A true friend leaves paw prints on your heart."'],
-        timeline: formData.timeline?.slice(0, 3).map(m => ({ date: m.date, caption: m.caption })) || [],
-        gallery: formData.photos?.slice(0, 5).map(p => ({ url: p, caption: '' })) || [],
-        memoryHighlights: [
-          { title: 'Favorite Movie', description: formData.favoriteMovie || 'Unknown', emoji: '🎥' },
-          { title: 'Superpower', description: formData.whatMakesThemSpecial || 'Being awesome', emoji: '✨' },
-        ],
-        theme: {
-          mode: formData.themeMode === 'light' ? 'light' : 'dark',
-          accent: 'purple',
-          density: formData.density === 'minimal' ? 'minimal' : 'luxury',
-        },
-        closingMessage: 'With all my heart.',
-        ogTitle: `A special greeting for ${formData.recipientName}`,
-        ogDescription: 'Someone made something beautiful just for you.',
-      };
+      aiContent = createPersonalizedMock(formData);
     } else {
       // 2. Generate content using Vercel AI SDK and Google Gemini 1.5 Pro
       const result = await generateObject({
@@ -91,7 +72,7 @@ export async function POST(req: Request) {
     }
 
     // 4. Return the slug for redirect
-    return NextResponse.json({ success: true, slug, mockContent: aiContent });
+    return NextResponse.json({ success: true, slug, ownerToken, mockContent: aiContent });
 
   } catch (error) {
     console.error('Generation Error:', error);

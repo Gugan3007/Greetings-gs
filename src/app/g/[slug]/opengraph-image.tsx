@@ -11,9 +11,7 @@ export const size = {
 
 export const contentType = 'image/png';
 
-export default async function Image({ params }: { params: { slug: string } }) {
-  const { slug } = params;
-
+export default async function Image() {
   // ─── Fetch Data (Mocked for now) ───────────────────────────────────────────
   const recipientName = 'Someone Special';
   const headline = 'A beautiful cinematic greeting awaits you.';

@@ -103,6 +103,60 @@ body {
   line-height: 1.6;
 }
 
+.greeting-page {
+  --greeting-surface: rgba(255, 255, 255, 0.045);
+  --greeting-border: rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--greeting-accent) 13%, transparent), transparent 33rem),
+    var(--bg);
+}
+
+.greeting-page.theme-light {
+  --bg: #f7f5f3;
+  --fg: #19171b;
+  --fg-secondary: #5f5964;
+  --fg-tertiary: #77707d;
+  --fg-muted: #8e8793;
+  --glass-bg: rgba(255, 255, 255, 0.66);
+  --glass-border: rgba(24, 20, 28, 0.1);
+  --greeting-surface: rgba(255, 255, 255, 0.72);
+  color: var(--fg);
+}
+
+.greeting-section {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
+}
+
+.greeting-feature {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--greeting-accent) 12%, transparent), transparent 55%),
+    var(--greeting-surface);
+  box-shadow: 0 30px 100px color-mix(in srgb, var(--greeting-accent) 12%, transparent);
+}
+
+.greeting-vignette {
+  background:
+    radial-gradient(circle at 50% 35%, transparent 10%, var(--bg) 82%),
+    linear-gradient(90deg, color-mix(in srgb, var(--greeting-accent) 4%, transparent), transparent 24%, transparent 76%, color-mix(in srgb, var(--greeting-accent) 4%, transparent));
+}
+
+.form-wizard-frame {
+  width: min(calc(100% - 2rem), 42rem);
+  padding: 2.5rem 1.5rem;
+}
+
+.custom-cursor-layer {
+  contain: strict;
+}
+
+@media (min-width: 640px) {
+  .form-wizard-frame {
+    padding: 3rem 2.5rem;
+  }
+}
+
 /* ─── Selection Styles ───────────────────────────────────────────────────── */
 
 ::selection {

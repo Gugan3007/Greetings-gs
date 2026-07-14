@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { useParams } from 'next/navigation';
 import { type GreetingContent } from '@/lib/ai/schema';
 import { GreetingHero } from '@/features/greeting/GreetingHero';
@@ -9,28 +9,37 @@ import { GreetingHighlights } from '@/features/greeting/GreetingHighlights';
 import { GreetingTimeline } from '@/features/greeting/GreetingTimeline';
 import { GreetingGallery } from '@/features/greeting/GreetingGallery';
 import { GreetingLetter } from '@/features/greeting/GreetingLetter';
+import { GreetingSignature } from '@/features/greeting/GreetingSignature';
+import { PersonalizedBackdrop } from '@/features/greeting/PersonalizedBackdrop';
 import { ShareModal } from '@/features/greeting/ShareModal';
 import { MagneticButton } from '@/components/motion/MagneticButton';
 import { Heart, Share2 } from 'lucide-react';
 
+const subscribeSession = () => () => undefined;
+
 export default function GreetingPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const [data, setData] = useState<GreetingContent | null>(null);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-
-  useEffect(() => {
-    // Determine which mode we are in (mock vs real)
-    const resultRaw = sessionStorage.getItem('gs-greeting-result');
-    if (resultRaw) {
+  const resultRaw = useSyncExternalStore(
+    subscribeSession,
+    () => sessionStorage.getItem(`gs-greeting-result:${slug}`) || sessionStorage.getItem('gs-greeting-result'),
+    () => null
+  );
+  const sessionResult = useMemo(() => {
+    if (!resultRaw) return null;
+    try {
       const result = JSON.parse(resultRaw);
-      if (result.slug === slug) {
-        setData(result.mockContent);
-      }
-    } else {
-      // Real DB fetch would go here
+      return result.slug === slug ? result : null;
+    } catch {
+      return null;
     }
-  }, [slug]);
+  }, [resultRaw, slug]);
+  const data = (sessionResult?.mockContent || null) as GreetingContent | null;
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const isOwner = Boolean(
+    sessionResult?.ownerToken &&
+    sessionStorage.getItem(`gs-greeting-owner:${slug}`) === sessionResult.ownerToken
+  );
 
   if (!data) {
     return (
@@ -45,23 +54,34 @@ export default function GreetingPage() {
   
   return (
     <div 
-      className="relative min-h-[100svh] overflow-x-hidden bg-background text-foreground selection:bg-accent-purple/30 selection:text-white"
-      style={{
-        // Define root accent variables for this specific greeting
-        ['--greeting-accent' as any]: `var(${accentVar})`,
-      }}
+      className={`greeting-page relative min-h-[100svh] overflow-x-hidden text-foreground selection:bg-accent-purple/30 selection:text-white theme-${data.theme.mode}`}
+      style={{ '--greeting-accent': `var(${accentVar})` } as CSSProperties}
     >
-      {/* ── Components ── */}
-      <GreetingHero data={data} />
-      <GreetingNarrative data={data} />
-      <GreetingHighlights data={data} />
-      <GreetingTimeline data={data} />
-      <GreetingGallery data={data} />
-      <GreetingLetter data={data} />
+      <PersonalizedBackdrop data={data} />
+
+      {isOwner ? (
+        <div className="fixed inset-x-0 top-5 z-40 flex justify-center px-4">
+          <div className="flex items-center gap-3 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-medium text-white/70 shadow-xl backdrop-blur-xl">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            Sender preview
+            <button className="text-white transition-opacity hover:opacity-70" onClick={() => setIsShareModalOpen(true)}>Share</button>
+          </div>
+        </div>
+      ) : null}
+
+      <main className="relative z-10">
+        <GreetingHero data={data} />
+        <GreetingSignature data={data} />
+        <GreetingNarrative data={data} />
+        <GreetingHighlights data={data} />
+        <GreetingTimeline data={data} />
+        <GreetingGallery data={data} />
+        <GreetingLetter data={data} />
+      </main>
 
       {/* ── Footer ── */}
       <footer className="relative mt-20 border-t border-glass-border bg-glass-bg py-12 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-6 text-center">
+        <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-6 px-6 text-center">
           <p className="text-sm font-medium text-fg-secondary">
             Generated with love using <span className="text-foreground">GS Greetings AI</span>
           </p>
@@ -75,7 +95,7 @@ export default function GreetingPage() {
             </MagneticButton>
             <MagneticButton
               className="flex items-center gap-2 rounded-full border border-glass-border bg-white/5 px-6 py-2.5 text-sm font-medium transition-colors hover:bg-white/10"
-              onClick={() => window.location.href = '/'}
+              onClick={() => window.location.href = '/create?new=1'}
             >
               Create Your Own
               <Heart className="h-4 w-4 text-accent-rose" />

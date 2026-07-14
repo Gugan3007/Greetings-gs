@@ -8,7 +8,6 @@ import confetti from 'canvas-confetti';
 import { AuroraBackground } from '@/components/backgrounds/AuroraBackground';
 import { FloatingOrbs } from '@/components/backgrounds/FloatingOrbs';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { duration, ease } from '@/lib/motion';
 
 // ─── Stage Configuration ─────────────────────────────────────────────────────
 
@@ -136,6 +135,11 @@ export function ProcessingScreen() {
         
         // Save the slug/mock data for the redirect
         sessionStorage.setItem('gs-greeting-result', JSON.stringify(data));
+        sessionStorage.setItem(`gs-greeting-result:${data.slug}`, JSON.stringify(data));
+        if (data.ownerToken) {
+          sessionStorage.setItem(`gs-greeting-owner:${data.slug}`, data.ownerToken);
+        }
+        sessionStorage.removeItem('gs-greeting-submission');
 
       } catch (err) {
         console.error(err);

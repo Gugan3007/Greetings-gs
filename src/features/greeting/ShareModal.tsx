@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Share2, Copy, Check, MessageCircle, X } from 'lucide-react';
-import { MagneticButton } from '@/components/motion/MagneticButton';
 import { RippleButton } from '@/components/motion/RippleButton';
 
 // ─── Inline Brand SVGs ───────────────────────────────────────────────────────

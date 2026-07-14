@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useMemo, useCallback } from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useMousePosition } from '@/hooks/useMousePosition';
@@ -9,31 +9,33 @@ import { lerp } from '@/lib/utils';
 
 const PARTICLE_COUNT = 200;
 
+function seededValue(index: number, offset: number) {
+  const value = Math.sin(index * 12.9898 + offset * 78.233) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+const PARTICLE_DATA = (() => {
+  const positions = new Float32Array(PARTICLE_COUNT * 3);
+  const sizes = new Float32Array(PARTICLE_COUNT);
+  for (let index = 0; index < PARTICLE_COUNT; index++) {
+    const radius = 3 + seededValue(index, 1) * 5;
+    const theta = seededValue(index, 2) * Math.PI * 2;
+    const phi = Math.acos(2 * seededValue(index, 3) - 1);
+    positions[index * 3] = radius * Math.sin(phi) * Math.cos(theta);
+    positions[index * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+    positions[index * 3 + 2] = radius * Math.cos(phi);
+    sizes[index] = 0.5 + seededValue(index, 4) * 2;
+  }
+  return [positions, sizes] as const;
+})();
+
 function Particles() {
   const meshRef = useRef<THREE.Points>(null);
   const mouse = useMousePosition();
   const prefersReduced = useReducedMotion();
   const targetRotation = useRef({ x: 0, y: 0 });
 
-  const [positions, sizes] = useMemo(() => {
-    const pos = new Float32Array(PARTICLE_COUNT * 3);
-    const siz = new Float32Array(PARTICLE_COUNT);
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      // Distribute in a sphere
-      const radius = 3 + Math.random() * 5;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-
-      pos[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = radius * Math.cos(phi);
-
-      siz[i] = 0.5 + Math.random() * 2;
-    }
-
-    return [pos, siz];
-  }, []);
+  const [positions, sizes] = PARTICLE_DATA;
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;

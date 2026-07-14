@@ -39,22 +39,26 @@ function clearDraft(): void {
 
 // ─── Form Store Hook ─────────────────────────────────────────────────────────
 
-export function useFormStore() {
-  const [formData, setFormData] = useState<FormData>(defaultFormValues);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+export function useFormStore({ startFresh = false }: { startFresh?: boolean } = {}) {
+  const [initialDraft] = useState(() => (startFresh ? null : loadDraft()));
+  const [formData, setFormData] = useState<FormData>(() => ({
+    ...defaultFormValues,
+    ...(initialDraft?.data || {}),
+  }));
+  const [currentStep, setCurrentStep] = useState(() => initialDraft?.currentStep ?? 0);
+  const isLoaded = true;
   const [isDirty, setIsDirty] = useState(false);
   const autoSaveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Load draft on mount
+  // A deliberate `?new=1` entry is a new creation session. Only external
+  // persistence is touched here; the React state already starts from defaults.
   useEffect(() => {
-    const draft = loadDraft();
-    if (draft?.data) {
-      setFormData((prev) => ({ ...prev, ...draft.data }));
-      setCurrentStep(draft.currentStep);
-    }
-    setIsLoaded(true);
-  }, []);
+    if (!startFresh) return;
+    clearDraft();
+    sessionStorage.removeItem('gs-greeting-submission');
+    sessionStorage.removeItem('gs-greeting-result');
+    window.history.replaceState(null, '', '/create');
+  }, [startFresh]);
 
   // Autosave every 5 seconds when dirty
   useEffect(() => {
@@ -113,11 +117,11 @@ export function useFormStore() {
     setIsDirty(false);
   }, []);
 
-  // Save and clear draft on submit
+  // Return the current snapshot. The caller clears only after safely placing it
+  // in sessionStorage, so a failed navigation never destroys the user's work.
   const submitForm = useCallback(() => {
-    saveDraft(formData, currentStep);
     return formData;
-  }, [formData, currentStep]);
+  }, [formData]);
 
   const progress = ((currentStep + 1) / TOTAL_STEPS) * 100;
   const isFirstStep = currentStep === 0;

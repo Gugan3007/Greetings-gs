@@ -19,6 +19,11 @@ export const greetingThemeSchema = z.object({
   mode: z.enum(['light', 'dark']),
   accent: z.enum(['purple', 'blue', 'roseGold']),
   density: z.enum(['minimal', 'luxury']),
+  archetype: z
+    .enum(['romance', 'family', 'friendship', 'celebration', 'comfort', 'achievement'])
+    .optional(),
+  motifs: z.array(z.string().max(24)).max(6).optional(),
+  themeLabel: z.string().max(80).optional(),
 });
 
 export const greetingContentSchema = z.object({
@@ -51,6 +56,8 @@ export const greetingContentSchema = z.object({
 
   // ── Generated Metadata ──────────────────
   closingMessage: z.string().max(300),
+  signatureLine: z.string().max(180).optional(),
+  playfulAside: z.string().max(220).optional(),
   ogTitle: z.string().max(70),
   ogDescription: z.string().max(160),
 });

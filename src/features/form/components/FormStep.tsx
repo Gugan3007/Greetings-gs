@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Plus, Trash2, Upload, Calendar, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -19,7 +19,7 @@ interface FormStepRendererProps {
  */
 export function FormStepRenderer({ step, formData, updateField }: FormStepRendererProps) {
   return (
-    <div className="space-y-8">
+    <div className="mx-auto flex max-w-xl flex-col gap-8">
       {step.fields.map((field) => (
         <FieldRenderer
           key={field.key}
@@ -56,7 +56,6 @@ function FieldRenderer({ field, value, onChange, accentColor }: FieldRendererPro
           field={field}
           value={value as string}
           onChange={onChange}
-          accentColor={accentColor}
         />
       );
     case 'timeline':
@@ -75,7 +74,6 @@ function FieldRenderer({ field, value, onChange, accentColor }: FieldRendererPro
           field={field}
           value={value as boolean}
           onChange={onChange}
-          accentColor={accentColor}
         />
       );
     default:
@@ -95,7 +93,7 @@ function TextField({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 text-center">
       <label className="block text-sm font-medium text-foreground">
         {field.label}
         {field.required && <span className="ml-1 text-accent-rose">*</span>}
@@ -108,7 +106,7 @@ function TextField({
         maxLength={field.maxLength}
         className={cn(
           'w-full rounded-[var(--radius-md)] border border-glass-border bg-glass-bg px-4 py-3',
-          'text-foreground placeholder:text-fg-muted',
+          'text-center text-foreground placeholder:text-fg-muted',
           'transition-all duration-200',
           'focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple/50',
           'hover:border-[rgba(255,255,255,0.15)]'
@@ -136,7 +134,7 @@ function TextareaField({
   const maxLen = field.maxLength || 1000;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 text-center">
       <label className="block text-sm font-medium text-foreground">
         {field.label}
         {field.required && <span className="ml-1 text-accent-rose">*</span>}
@@ -149,19 +147,19 @@ function TextareaField({
         rows={field.key === 'personalLetter' ? 8 : 4}
         className={cn(
           'w-full resize-none rounded-[var(--radius-md)] border border-glass-border bg-glass-bg px-4 py-3',
-          'text-foreground placeholder:text-fg-muted',
+          'text-center text-foreground placeholder:text-fg-muted',
           'transition-all duration-200',
           'focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple/50',
           'hover:border-[rgba(255,255,255,0.15)]'
         )}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-center gap-4">
         {field.helperText && (
           <p className="text-xs text-fg-muted">{field.helperText}</p>
         )}
         <p
           className={cn(
-            'text-xs ml-auto',
+            'text-xs',
             charCount > maxLen * 0.9 ? 'text-accent-rose' : 'text-fg-muted'
           )}
         >
@@ -184,7 +182,7 @@ function DateField({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 text-center">
       <label className="block text-sm font-medium text-foreground">
         {field.label}
       </label>
@@ -213,17 +211,15 @@ function OptionCardsField({
   field,
   value,
   onChange,
-  accentColor,
 }: {
   field: FormField;
   value: string;
   onChange: (v: string) => void;
-  accentColor: string;
 }) {
   const options = field.options || [];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 text-center">
       <label className="block text-sm font-medium text-foreground">
         {field.label}
         {field.required && <span className="ml-1 text-accent-rose">*</span>}
@@ -303,7 +299,7 @@ function TimelineField({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-xl space-y-4">
       {/* Removed redundant label and description since they are handled by the Step Header */}
 
       <AnimatePresence mode="popLayout">
@@ -377,7 +373,7 @@ function PhotosField({
   onChange: (v: string[]) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const photos = value || [];
+  const photos = value;
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -480,12 +476,10 @@ function CheckboxField({
   field,
   value,
   onChange,
-  accentColor,
 }: {
   field: FormField;
   value: boolean;
   onChange: (v: boolean) => void;
-  accentColor: string;
 }) {
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-glass-border bg-glass-bg p-4 transition-colors hover:border-[rgba(255,255,255,0.15)]">

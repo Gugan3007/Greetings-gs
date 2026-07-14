@@ -13,7 +13,7 @@ export function GreetingGallery({ data }: GreetingGalleryProps) {
   if (photos.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24 sm:py-32">
+    <section className="greeting-section py-20 sm:py-32">
       <Reveal direction="up">
         <h2 
           className="mb-16 text-center text-4xl font-bold sm:text-5xl"
@@ -23,22 +23,21 @@ export function GreetingGallery({ data }: GreetingGalleryProps) {
         </h2>
       </Reveal>
 
-      {/* Basic responsive masonry-like grid */}
-      <div className="columns-2 gap-4 sm:columns-3 md:columns-4 lg:gap-6">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {photos.map((photo, idx) => (
           <Reveal 
             key={idx} 
             blur={10} 
             direction="up"
             delay={idx * 0.05} 
-            className="mb-4 break-inside-avoid lg:mb-6"
+            className="min-w-0"
           >
-            <div className="group relative overflow-hidden rounded-[var(--radius-md)] border border-glass-border">
+            <div className={`group relative overflow-hidden rounded-[1.5rem] border border-glass-border ${idx % 5 === 0 ? 'sm:row-span-2' : ''}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.url}
                 alt={photo.caption || `Memory ${idx + 1}`}
-                className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                className={`w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${idx % 5 === 0 ? 'aspect-[4/5] sm:h-full' : 'aspect-[4/3]'}`}
                 loading="lazy"
               />
               
