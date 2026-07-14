@@ -1,9 +1,11 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Plus, Trash2, Upload, Calendar, X } from 'lucide-react';
+import { Check, Plus, Trash2, Upload, Calendar, X, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { uploadPhoto } from '@/lib/media/upload-photo';
+import { uploadRequestSchema } from '@/lib/media/upload-contract';
 import { type FormData, type TimelineMilestone } from '../schema';
 import { type FormStep, type FormField } from '../steps';
 
@@ -365,6 +367,13 @@ function TimelineField({
 
 // ─── Photos Upload ───────────────────────────────────────────────────────────
 
+const readLocalPreview = (file: File) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result as string);
+  reader.onerror = () => reject(new Error(`Unable to read ${file.name}.`));
+  reader.readAsDataURL(file);
+});
+
 function PhotosField({
   value,
   onChange,
@@ -374,29 +383,79 @@ function PhotosField({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photos = value;
+  const [isUploading, setIsUploading] = useState(false);
+  const [completedUploads, setCompletedUploads] = useState(0);
+  const [uploadTotal, setUploadTotal] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [failedFiles, setFailedFiles] = useState<File[]>([]);
+
+  const uploadFiles = useCallback(async (files: File[]) => {
+    if (files.length === 0) return;
+    if (photos.length + files.length > 20) {
+      setUploadError('Maximum 20 photos allowed.');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setFailedFiles([]);
+    setCompletedUploads(0);
+    setUploadTotal(files.length);
+
+    const cloudConfigured = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const results = await Promise.all(files.map(async (file) => {
+      try {
+        const validation = uploadRequestSchema.safeParse({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        });
+        if (!validation.success) {
+          throw new Error(`${file.name} must be a JPG, PNG, WebP, or GIF up to 10 MB.`);
+        }
+
+        const url = cloudConfigured
+          ? await uploadPhoto(file)
+          : process.env.NODE_ENV === 'development'
+            ? await readLocalPreview(file)
+            : await uploadPhoto(file);
+        return { file, url };
+      } catch (error) {
+        return {
+          file,
+          error: error instanceof Error ? error.message : `Unable to upload ${file.name}.`,
+        };
+      } finally {
+        setCompletedUploads((count) => count + 1);
+      }
+    }));
+
+    const successfulUrls = results
+      .map((result) => result.url)
+      .filter((url): url is string => typeof url === 'string');
+    const failures = results
+      .filter((result) => typeof result.error === 'string')
+      .map((result) => result.file);
+    const firstError = results.find((result) => typeof result.error === 'string');
+
+    if (successfulUrls.length > 0) onChange([...photos, ...successfulUrls]);
+    setFailedFiles(failures);
+    setUploadError(firstError?.error || null);
+    setIsUploading(false);
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, [photos, onChange]);
 
   const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
-      if (photos.length + files.length > 20) {
-        alert('Maximum 20 photos allowed');
-        return;
-      }
-
-      // Convert to data URLs for preview (will be uploaded to storage later)
-      files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const url = reader.result as string;
-          onChange([...photos, url]);
-        };
-        reader.readAsDataURL(file);
-      });
-
-      // Reset input
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      await uploadFiles(files);
     },
-    [photos, onChange]
+    [uploadFiles]
   );
 
   const removePhoto = (index: number) => {
@@ -407,8 +466,31 @@ function PhotosField({
     <div className="space-y-4">
       <label className="block text-sm font-medium text-foreground">Photos</label>
       <p className="text-xs text-fg-muted">
-        Upload up to 20 photos. Square or portrait orientation work best.
+        Upload up to 20 photos. JPG, PNG, WebP, or GIF up to 10 MB each.
       </p>
+
+      {isUploading ? (
+        <div className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] border border-accent-purple/25 bg-accent-purple/10 px-4 py-3 text-sm text-fg-secondary" role="status">
+          <Loader2 className="h-4 w-4 animate-spin text-accent-purple" />
+          Uploading {completedUploads} of {uploadTotal}
+        </div>
+      ) : null}
+
+      {uploadError ? (
+        <div className="rounded-[var(--radius-md)] border border-accent-rose/30 bg-accent-rose/10 p-3 text-center text-sm text-accent-rose" role="alert">
+          <p>{uploadError}</p>
+          {failedFiles.length > 0 ? (
+            <button
+              type="button"
+              className="mx-auto mt-2 inline-flex items-center gap-2 rounded-full border border-accent-rose/30 px-3 py-1.5 text-xs font-semibold"
+              onClick={() => uploadFiles(failedFiles)}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Retry failed {failedFiles.length === 1 ? 'photo' : 'photos'}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Photo grid */}
       {photos.length > 0 && (
@@ -432,7 +514,7 @@ function PhotosField({
                 <button
                   type="button"
                   onClick={() => removePhoto(i)}
-                  className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                   aria-label={`Remove photo ${i + 1}`}
                 >
                   <X className="h-3 w-3" />
@@ -448,12 +530,13 @@ function PhotosField({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
           className="flex w-full flex-col items-center justify-center gap-2 rounded-[var(--radius-md)] border-2 border-dashed border-glass-border py-8 text-fg-secondary transition-colors hover:border-accent-purple hover:text-accent-purple"
         >
           <Upload className="h-8 w-8" />
           <span className="text-sm font-medium">Click to upload photos</span>
           <span className="text-xs text-fg-muted">
-            {photos.length}/20 photos • JPG, PNG, WebP
+            {photos.length}/20 photos • JPG, PNG, WebP, GIF • 10 MB max
           </span>
         </button>
       )}
@@ -461,7 +544,7 @@ function PhotosField({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif"
         multiple
         onChange={handleFileSelect}
         className="hidden"
