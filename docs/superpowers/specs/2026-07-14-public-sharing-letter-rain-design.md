@@ -8,7 +8,7 @@ Make every generated greeting available through a durable HTTPS link that opens 
 
 Supabase becomes the durable source of truth and Vercel hosts the Next.js application. The browser never receives database credentials with elevated access.
 
-- A server-only Supabase admin client uses `SUPABASE_SERVICE_ROLE_KEY` inside API routes.
+- A server-only Supabase admin client uses the current `SUPABASE_SECRET_KEY` inside API routes.
 - The `greetings` table stores the slug, authored JSON content, ownership token hash, publication status, and timestamps.
 - `/api/generate` authors the greeting, persists it, and returns only the slug, owner token, and canonical HTTPS share URL.
 - `/api/greetings/[slug]` reads published content from Supabase. The in-memory store remains only as a development acceleration path, not as the durable source.
@@ -61,8 +61,8 @@ The signature sentence remains semantic text for screen readers. Visually, each 
 The deployment needs a Supabase project and Vercel project with these environment variables:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY`
 - `NEXT_PUBLIC_SITE_URL`
 - `GOOGLE_GEMINI_API_KEY` when live AI generation is desired
 
