@@ -7,6 +7,7 @@ import { formSchema } from '@/features/form/schema';
 import { greetingContentSchema, type GreetingContent } from '@/lib/ai/schema';
 import { buildSystemPrompt } from '@/lib/ai/prompt';
 import { createPersonalizedMock } from '@/lib/ai/mock';
+import { dedupeGreetingContent } from '@/lib/ai/dedupe';
 import { supabase } from '@/lib/supabase/client';
 
 export const maxDuration = 60; // 60 seconds max duration for AI generation
@@ -52,6 +53,8 @@ export async function POST(req: Request) {
 
       aiContent = result.object;
     }
+
+    aiContent = dedupeGreetingContent(aiContent);
 
     // 3. Save to Supabase
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {

@@ -87,7 +87,7 @@
 }
 
 html {
-  scroll-behavior: auto; /* Lenis handles smooth scroll */
+  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -138,6 +138,45 @@ body {
   background:
     radial-gradient(circle at 50% 35%, transparent 10%, var(--bg) 82%),
     linear-gradient(90deg, color-mix(in srgb, var(--greeting-accent) 4%, transparent), transparent 24%, transparent 76%, color-mix(in srgb, var(--greeting-accent) 4%, transparent));
+}
+
+.memory-photo-frame {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--greeting-accent) 78%, white),
+    rgba(255, 255, 255, 0.1) 42%,
+    color-mix(in srgb, var(--greeting-accent) 45%, transparent)
+  );
+  box-shadow:
+    0 28px 90px color-mix(in srgb, var(--greeting-accent) 16%, transparent),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.particle-field__layer {
+  position: absolute;
+  inset: -12%;
+  opacity: 0.34;
+  background-image:
+    radial-gradient(circle, rgba(192, 132, 252, 0.72) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(96, 165, 250, 0.5) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.4) 0 0.8px, transparent 1.4px);
+  background-size: 173px 173px, 257px 257px, 311px 311px;
+  background-position: 13px 27px, 81px 119px, 147px 53px;
+  will-change: transform;
+  animation: particle-drift 32s ease-in-out infinite alternate;
+}
+
+.particle-field__layer--near {
+  opacity: 0.2;
+  transform: scale(1.08);
+  background-size: 223px 223px, 337px 337px, 419px 419px;
+  animation-duration: 44s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes particle-drift {
+  from { transform: translate3d(-1.5%, -1%, 0); }
+  to { transform: translate3d(1.5%, 1%, 0); }
 }
 
 .form-wizard-frame {

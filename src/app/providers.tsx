@@ -2,7 +2,6 @@
 
 import { ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import { ReactLenis } from 'lenis/react';
 
 // Lazy-load cursor — only on desktop with fine pointer
 const CustomCursor = dynamic(
@@ -14,13 +13,9 @@ const CustomCursor = dynamic(
 );
 
 /**
- * Client-side providers: Lenis smooth scroll + custom cursor.
+ * Client-side providers. Native scrolling is intentionally retained because it
+ * is substantially smoother and more reliable in Safari for media-heavy pages.
  */
 export function Providers({ children }: { children: ReactNode }) {
-  return (
-    <ReactLenis root options={{ lerp: 0.1, duration: 1.2 }}>
-      <CustomCursor />
-      {children}
-    </ReactLenis>
-  );
+  return <><CustomCursor />{children}</>;
 }

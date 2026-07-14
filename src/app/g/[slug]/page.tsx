@@ -3,6 +3,7 @@
 import { useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { useParams } from 'next/navigation';
 import { type GreetingContent } from '@/lib/ai/schema';
+import { dedupeGreetingContent } from '@/lib/ai/dedupe';
 import { GreetingHero } from '@/features/greeting/GreetingHero';
 import { GreetingNarrative } from '@/features/greeting/GreetingNarrative';
 import { GreetingHighlights } from '@/features/greeting/GreetingHighlights';
@@ -12,7 +13,6 @@ import { GreetingLetter } from '@/features/greeting/GreetingLetter';
 import { GreetingSignature } from '@/features/greeting/GreetingSignature';
 import { PersonalizedBackdrop } from '@/features/greeting/PersonalizedBackdrop';
 import { ShareModal } from '@/features/greeting/ShareModal';
-import { MagneticButton } from '@/components/motion/MagneticButton';
 import { Heart, Share2 } from 'lucide-react';
 
 const subscribeSession = () => () => undefined;
@@ -34,7 +34,10 @@ export default function GreetingPage() {
       return null;
     }
   }, [resultRaw, slug]);
-  const data = (sessionResult?.mockContent || null) as GreetingContent | null;
+  const data = useMemo(() => {
+    const content = (sessionResult?.mockContent || null) as GreetingContent | null;
+    return content ? dedupeGreetingContent(content) : null;
+  }, [sessionResult]);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const isOwner = Boolean(
     sessionResult?.ownerToken &&
@@ -64,7 +67,7 @@ export default function GreetingPage() {
           <div className="flex items-center gap-3 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-medium text-white/70 shadow-xl backdrop-blur-xl">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             Sender preview
-            <button className="text-white transition-opacity hover:opacity-70" onClick={() => setIsShareModalOpen(true)}>Share</button>
+            <button type="button" className="rounded-full px-1 py-0.5 text-white transition-opacity hover:opacity-70" onClick={() => setIsShareModalOpen(true)}>Share</button>
           </div>
         </div>
       ) : null}
@@ -86,20 +89,22 @@ export default function GreetingPage() {
             Generated with love using <span className="text-foreground">GS Greetings AI</span>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <MagneticButton
+            <button
+              type="button"
               className="flex items-center gap-2 rounded-full bg-gradient-to-r from-accent-purple to-accent-blue px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-transform hover:scale-105"
               onClick={() => setIsShareModalOpen(true)}
             >
               <Share2 className="h-4 w-4" />
               Share Greeting
-            </MagneticButton>
-            <MagneticButton
+            </button>
+            <button
+              type="button"
               className="flex items-center gap-2 rounded-full border border-glass-border bg-white/5 px-6 py-2.5 text-sm font-medium transition-colors hover:bg-white/10"
               onClick={() => window.location.href = '/create?new=1'}
             >
               Create Your Own
               <Heart className="h-4 w-4 text-accent-rose" />
-            </MagneticButton>
+            </button>
           </div>
         </div>
       </footer>

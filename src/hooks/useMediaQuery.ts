@@ -2,6 +2,8 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
+const subscribeStatic = () => () => undefined;
+
 /**
  * Hook to detect media query matches reactively.
  */
@@ -28,4 +30,13 @@ export function useFinePointer(): boolean {
  */
 export function useIsMobile(): boolean {
   return useMediaQuery('(max-width: 768px)');
+}
+
+/** Safari receives a lighter interaction path for reliable 60fps scrolling. */
+export function useIsSafari(): boolean {
+  return useSyncExternalStore(
+    subscribeStatic,
+    () => /^((?!chrome|chromium|android).)*safari/i.test(navigator.userAgent),
+    () => false
+  );
 }

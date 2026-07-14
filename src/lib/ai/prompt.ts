@@ -66,6 +66,13 @@ Populate the strict JSON schema provided.
 - **closingMessage**: A sweet, final send-off before the footer.
 - **ogTitle / ogDescription**: SEO metadata for when this link is shared on iMessage/WhatsApp.
 
+### Strict uniqueness rules:
+- Every visible sentence must do a different emotional job.
+- Never repeat the signatureLine in story, quotes, highlights, playfulAside, or closingMessage.
+- Never repeat a story sentence as a quote. Quotes must be newly written companion thoughts.
+- Connect paragraphs with emotional progression: recognition → memory → meaning → hope.
+- Avoid stock phrases such as “the real treat,” “makes everything brighter,” and “one in a million.”
+
 Make every creative choice relationship-appropriate. A greeting for a mother must not read like romance; a friendship must not use partner language. Be inventive, specific, emotionally intelligent, and make it feel like a million bucks.
 `;
 }
