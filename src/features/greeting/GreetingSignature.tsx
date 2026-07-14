@@ -3,6 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import type { GreetingContent } from '@/lib/ai/schema';
 import { Reveal } from '@/components/motion/Reveal';
+import { WordTrain } from './WordTrain';
 
 export function GreetingSignature({ data }: { data: GreetingContent }) {
   if (!data.signatureLine && !data.playfulAside) return null;
@@ -15,8 +16,8 @@ export function GreetingSignature({ data }: { data: GreetingContent }) {
             <Sparkles className="h-5 w-5 text-[color:var(--greeting-accent)]" />
           </div>
           {data.signatureLine ? (
-            <p className="mx-auto max-w-3xl text-balance font-display text-3xl font-medium leading-tight sm:text-4xl md:text-5xl">
-              {data.signatureLine}
+            <p className="mx-auto max-w-3xl font-display text-3xl font-medium leading-tight sm:text-4xl md:text-5xl">
+              <WordTrain text={data.signatureLine} />
             </p>
           ) : null}
           {data.playfulAside ? (

@@ -107,12 +107,12 @@ export const FORM_STEPS: FormStep[] = [
   // ── Step 5: Your letter ─────────────────────────────
   {
     id: 'letter',
-    title: 'Write your letter',
-    subtitle: 'Your words, in your voice. The AI will only lightly format this — never rewrite it.',
+    title: 'Share what you feel',
+    subtitle: 'Give us the meaning. Our storyteller will shape it into something beautifully expressed.',
     icon: Heart,
     accentColor: 'var(--accent-rose)',
     fields: [
-      { key: 'personalLetter', label: 'Your personal letter', placeholder: 'Dear [name],\n\nI wanted to tell you...\n\nFrom my heart to yours,\n[your name]', type: 'textarea', maxLength: 5000, helperText: 'This appears as-is in the greeting. Write from the heart — there\'s no wrong way.' },
+      { key: 'personalLetter', label: 'What do you want them to feel?', placeholder: 'Share the thoughts, promises, or wishes you want the greeting to convey...', type: 'textarea', maxLength: 5000, helperText: 'We will re-author your notes with warmth and polish — they will not be copied word for word.' },
     ],
   },
 
@@ -181,6 +181,7 @@ export const FORM_STEPS: FormStep[] = [
     icon: Send,
     accentColor: 'var(--accent-blue)',
     fields: [
+      { key: 'senderName', label: 'Your name', placeholder: 'How should the greeting be signed?', type: 'text', required: true, helperText: 'Shown delicately at the end as the presenter' },
       { key: 'additionalNotes', label: 'Anything else the AI should know?', placeholder: 'e.g. They love cats, mention their dog Max, avoid mentioning their ex...', type: 'textarea', maxLength: 1000, helperText: 'Optional but helps the AI nail the details' },
       { key: 'deviceTarget', label: 'Primary device for viewing', type: 'option-cards', options: [
         { value: 'mobile', label: 'Mobile', emoji: '📱' },

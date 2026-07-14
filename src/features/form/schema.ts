@@ -125,6 +125,7 @@ export const formSchema = z.object({
   photoLayout: z.enum(PHOTO_LAYOUTS).default('polaroid'),
 
   // ── Delivery ─────────────────────────────
+  senderName: z.string().min(1, 'Your name is required').max(100),
   deviceTarget: z.enum(DEVICE_TARGETS).default('both'),
   socialLinks: z.string().max(500).optional().default(''),
   additionalNotes: z.string().max(1000).optional().default(''),
@@ -177,6 +178,7 @@ export const defaultFormValues: FormData = {
   language: 'en',
   emojiUsage: 'light',
   photoLayout: 'polaroid',
+  senderName: '',
   deviceTarget: 'both',
   socialLinks: '',
   additionalNotes: '',

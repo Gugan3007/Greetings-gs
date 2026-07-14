@@ -25,7 +25,13 @@ function uniqueText(values: string[], blocked = new Set<string>()) {
 export function dedupeGreetingContent(content: GreetingContent): GreetingContent {
   const signatureKey = content.signatureLine ? textKey(content.signatureLine) : '';
   const asideKey = content.playfulAside ? textKey(content.playfulAside) : '';
-  const blocked = new Set([signatureKey, asideKey].filter(Boolean));
+  const blocked = new Set([
+    signatureKey,
+    asideKey,
+    textKey(content.heroHeadline),
+    textKey(content.greetingMessage),
+    textKey(content.closingMessage),
+  ].filter(Boolean));
   const storyParagraphs = uniqueText(
     content.story.split(/\n\s*\n/).map((paragraph) => paragraph.trim()),
     blocked

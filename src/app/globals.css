@@ -101,6 +101,27 @@ body {
   line-height: 1.6;
 }
 
+.font-signature {
+  font-family: "Snell Roundhand", "Segoe Script", "Brush Script MT", cursive;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+.gs-watermark {
+  position: fixed;
+  right: max(0.8rem, env(safe-area-inset-right));
+  bottom: max(0.65rem, env(safe-area-inset-bottom));
+  z-index: 90;
+  pointer-events: none;
+  color: var(--fg);
+  font-family: "Snell Roundhand", "Segoe Script", "Brush Script MT", cursive;
+  font-size: 0.78rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  opacity: 0.2;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.16);
+}
+
 .greeting-page {
   --greeting-surface: rgba(255, 255, 255, 0.045);
   --greeting-border: rgba(255, 255, 255, 0.1);
@@ -132,6 +153,61 @@ body {
     linear-gradient(135deg, color-mix(in srgb, var(--greeting-accent) 12%, transparent), transparent 55%),
     var(--greeting-surface);
   box-shadow: 0 30px 100px color-mix(in srgb, var(--greeting-accent) 12%, transparent);
+}
+
+.word-train {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.18em 0.28em;
+  text-wrap: balance;
+}
+
+.word-train__car {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  border-radius: 0.32em;
+  padding: 0.02em 0.06em 0.08em;
+  background: linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--greeting-accent) 15%, transparent));
+  will-change: transform, opacity;
+}
+
+.word-train__coupler {
+  position: absolute;
+  top: 54%;
+  right: -0.23em;
+  width: 0.18em;
+  height: 1px;
+  background: color-mix(in srgb, var(--greeting-accent) 48%, transparent);
+}
+
+.dedication-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--greeting-accent) 24%, var(--greeting-border));
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--greeting-accent) 14%, transparent), transparent 55%),
+    var(--greeting-surface);
+  box-shadow: 0 28px 100px color-mix(in srgb, var(--greeting-accent) 10%, transparent);
+}
+
+.dedication-card::before,
+.dedication-card::after {
+  content: "✶";
+  position: absolute;
+  color: color-mix(in srgb, var(--greeting-accent) 58%, transparent);
+  font-size: 1rem;
+}
+
+.dedication-card::before { top: 1.5rem; left: 1.75rem; }
+.dedication-card::after { right: 1.75rem; bottom: 1.5rem; }
+
+.dedication-card__thread {
+  width: min(14rem, 60%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--greeting-accent), transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--greeting-accent) 45%, transparent);
 }
 
 .greeting-vignette {

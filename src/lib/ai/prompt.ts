@@ -13,6 +13,7 @@ Your job is to take raw answers from a user about someone they care about, and t
 
 ### Information Provided by the User:
 - **Recipient Name:** ${data.recipientName}
+- **Presented By:** ${data.senderName}
 - **Recipient Nickname:** ${data.recipientNickname}
 - **Relationship:** ${data.relationship}
 - **Occasion:** ${data.occasion} (Custom: ${data.customOccasion})
@@ -55,7 +56,7 @@ Populate the strict JSON schema provided.
 - **heroHeadline**: A punchy, cinematic opening line (e.g. "To the one who makes everything brighter.")
 - **greetingMessage**: A 1-2 sentence emotional opening.
 - **story**: A beautifully written narrative (3-4 paragraphs) synthesizing their personality, what makes them special, and your memories. 
-- **letter**: The exact personal letter provided by the user, formatted nicely. If none provided, write a short, heartfelt sign-off.
+- **letter**: Re-author the meaning of the user's notes as a polished, heartfelt letter. Never copy their wording sentence-for-sentence. If none was provided, write a short, relationship-appropriate letter.
 - **quotes**: Pull out 2-3 of the most impactful sentences from the story or letter to use as large pull-quotes.
 - **memoryHighlights**: Create 3-6 short, punchy highlights based on their favorites, achievements, or funny memories. (e.g. "Master of [Hobby]", "Always quoting [Movie]").
 - **theme**: Recommend an accent color and an emotional archetype. Use romance for partners, family for parents/siblings, friendship for friends, achievement for graduation/congratulations, comfort for get-well, otherwise celebration. Add 3-6 short visual motifs grounded in real preferences (for example paw prints for a dog lover, flaky layers for a porotta lover, flowers for a gardener). Add a short themeLabel that connects the occasion and person.
@@ -67,6 +68,9 @@ Populate the strict JSON schema provided.
 - **ogTitle / ogDescription**: SEO metadata for when this link is shared on iMessage/WhatsApp.
 
 ### Strict uniqueness rules:
+- Treat every free-text answer as private creative direction, not finished copy. Never reproduce a user-entered sentence verbatim. Proper names, dates, places, foods, pets, hobbies, and short preference labels may remain exact so the result stays truthful.
+- Paraphrase memories and feelings with an author's voice while preserving their meaning. Do not merely add an introduction before the user's original words.
+- Set **presentedBy** to the sender's name supplied above.
 - Every visible sentence must do a different emotional job.
 - Never repeat the signatureLine in story, quotes, highlights, playfulAside, or closingMessage.
 - Never repeat a story sentence as a quote. Quotes must be newly written companion thoughts.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { useParams } from 'next/navigation';
 import { type GreetingContent } from '@/lib/ai/schema';
 import { dedupeGreetingContent } from '@/lib/ai/dedupe';
@@ -11,11 +11,19 @@ import { GreetingTimeline } from '@/features/greeting/GreetingTimeline';
 import { GreetingGallery } from '@/features/greeting/GreetingGallery';
 import { GreetingLetter } from '@/features/greeting/GreetingLetter';
 import { GreetingSignature } from '@/features/greeting/GreetingSignature';
+import { GreetingDedication } from '@/features/greeting/GreetingDedication';
 import { PersonalizedBackdrop } from '@/features/greeting/PersonalizedBackdrop';
 import { ShareModal } from '@/features/greeting/ShareModal';
 import { Heart, Share2 } from 'lucide-react';
 
 const subscribeSession = () => () => undefined;
+
+type GreetingResult = {
+  slug: string;
+  mockContent: GreetingContent;
+  ownerToken?: string;
+  shareUrl?: string;
+};
 
 export default function GreetingPage() {
   const params = useParams();
@@ -28,16 +36,37 @@ export default function GreetingPage() {
   const sessionResult = useMemo(() => {
     if (!resultRaw) return null;
     try {
-      const result = JSON.parse(resultRaw);
+      const result = JSON.parse(resultRaw) as GreetingResult;
       return result.slug === slug ? result : null;
     } catch {
       return null;
     }
   }, [resultRaw, slug]);
+  const [remoteResult, setRemoteResult] = useState<GreetingResult | null>(null);
+  const [remoteMissing, setRemoteMissing] = useState(false);
+
+  useEffect(() => {
+    if (sessionResult) return;
+    const controller = new AbortController();
+
+    fetch(`/api/greetings/${encodeURIComponent(slug)}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Greeting not found');
+        return response.json() as Promise<GreetingResult>;
+      })
+      .then((result) => setRemoteResult(result))
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) setRemoteMissing(true);
+      });
+
+    return () => controller.abort();
+  }, [sessionResult, slug]);
+
+  const availableResult = sessionResult || remoteResult;
   const data = useMemo(() => {
-    const content = (sessionResult?.mockContent || null) as GreetingContent | null;
+    const content = availableResult?.mockContent || null;
     return content ? dedupeGreetingContent(content) : null;
-  }, [sessionResult]);
+  }, [availableResult]);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const isOwner = Boolean(
     sessionResult?.ownerToken &&
@@ -47,7 +76,14 @@ export default function GreetingPage() {
   if (!data) {
     return (
       <div className="flex min-h-[100svh] items-center justify-center bg-background text-foreground">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-purple border-t-transparent" />
+        {remoteMissing ? (
+          <div className="mx-auto max-w-md px-6 text-center">
+            <p className="font-display text-2xl font-semibold">This greeting is no longer available here.</p>
+            <p className="mt-3 text-sm text-fg-secondary">Ask the sender for a fresh link, or keep their computer server running while opening a local link.</p>
+          </div>
+        ) : (
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-purple border-t-transparent" />
+        )}
       </div>
     );
   }
@@ -80,6 +116,7 @@ export default function GreetingPage() {
         <GreetingTimeline data={data} />
         <GreetingGallery data={data} />
         <GreetingLetter data={data} />
+        <GreetingDedication data={data} />
       </main>
 
       {/* ── Footer ── */}
@@ -113,7 +150,7 @@ export default function GreetingPage() {
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        url={typeof window !== 'undefined' ? window.location.href : `https://gs-greetings.com/g/${slug}`}
+        url={sessionResult?.shareUrl || (typeof window !== 'undefined' ? window.location.href : `/g/${slug}`)}
         title={data.ogTitle || 'A special greeting for you'}
       />
     </div>

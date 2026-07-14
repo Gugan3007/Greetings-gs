@@ -29,6 +29,7 @@ export const greetingThemeSchema = z.object({
 export const greetingContentSchema = z.object({
   // ── Core Content ─────────────────────────
   recipientName: z.string(),
+  presentedBy: z.string().max(100).optional(),
   heroHeadline: z.string().max(100),
   greetingMessage: z.string().max(500),
   story: z.string().max(2000),

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
 import { nanoid } from 'nanoid';
+import { networkInterfaces } from 'node:os';
 
 import { formSchema } from '@/features/form/schema';
 import { greetingContentSchema, type GreetingContent } from '@/lib/ai/schema';
@@ -9,8 +10,24 @@ import { buildSystemPrompt } from '@/lib/ai/prompt';
 import { createPersonalizedMock } from '@/lib/ai/mock';
 import { dedupeGreetingContent } from '@/lib/ai/dedupe';
 import { supabase } from '@/lib/supabase/client';
+import { saveGreeting } from '@/lib/greetings/store';
 
 export const maxDuration = 60; // 60 seconds max duration for AI generation
+
+function getShareUrl(request: Request, slug: string) {
+  const configuredSite = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configuredSite && !configuredSite.includes('localhost')) {
+    return `${configuredSite.replace(/\/$/, '')}/g/${slug}`;
+  }
+
+  const requestUrl = new URL(request.url);
+  const localAddress = Object.values(networkInterfaces())
+    .flat()
+    .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
+  const hostname = localAddress || requestUrl.hostname;
+  const port = requestUrl.port ? `:${requestUrl.port}` : '';
+  return `${requestUrl.protocol}//${hostname}${port}/g/${slug}`;
+}
 
 export async function POST(req: Request) {
   try {
@@ -55,6 +72,7 @@ export async function POST(req: Request) {
     }
 
     aiContent = dedupeGreetingContent(aiContent);
+    saveGreeting(slug, aiContent);
 
     // 3. Save to Supabase
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -75,7 +93,13 @@ export async function POST(req: Request) {
     }
 
     // 4. Return the slug for redirect
-    return NextResponse.json({ success: true, slug, ownerToken, mockContent: aiContent });
+    return NextResponse.json({
+      success: true,
+      slug,
+      ownerToken,
+      shareUrl: getShareUrl(req, slug),
+      mockContent: aiContent,
+    });
 
   } catch (error) {
     console.error('Generation Error:', error);

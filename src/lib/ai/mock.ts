@@ -5,7 +5,30 @@ const includesAny = (value: string, terms: string[]) =>
   terms.some((term) => value.toLowerCase().includes(term));
 
 const capitalizeFirst = (value: string) => value ? value[0].toLocaleUpperCase() + value.slice(1) : value;
-const lowerFirst = (value: string) => value ? value[0].toLocaleLowerCase() + value.slice(1) : value;
+
+function authoredPersonality(data: FormData, name: string) {
+  const notes = `${data.personalityDescription} ${data.whatMakesThemSpecial} ${data.additionalNotes}`.toLowerCase();
+  if (includesAny(notes, ['kind', 'care', 'gentle', 'help', 'warm'])) return `${name}'s kindness never performs for applause; it simply notices what a heart needs and quietly leaves the day softer than it found it.`;
+  if (includesAny(notes, ['fun', 'laugh', 'joke', 'playful', 'funny'])) return `${name} carries laughter like pocket-sized sunlight, always ready to rescue an ordinary moment from taking itself too seriously.`;
+  if (includesAny(notes, ['brave', 'strong', 'resilient', 'hardwork', 'hard work'])) return `There is a graceful strength in ${name} — not the loud kind, but the kind that keeps choosing courage when no one is watching.`;
+  if (includesAny(notes, ['family', 'home', 'mother', 'mom', 'father', 'dad'])) return `${name} has made belonging feel less like a place and more like the certainty that someone will always leave a light on for you.`;
+  if (includesAny(notes, ['travel', 'adventure', 'explore', 'curious'])) return `${name} meets the world with an open window for a heart, finding wonder in roads others might pass without noticing.`;
+  return `What makes ${name} unforgettable is not one grand quality, but the rare way their presence makes people feel seen, safe, and a little more themselves.`;
+}
+
+function authoredMemory(data: FormData, name: string) {
+  if (!data.bestMoment && !data.funniestMemory) return '';
+  if (data.favoritePlace) return `${data.favoritePlace} is more than a pin on a map now; because of ${name}, it has become a doorway back to a feeling worth keeping.`;
+  if (data.funniestMemory) return `Somewhere between a shared glance and uncontrollable laughter, ${name} turned one small moment into a story that still knows how to make the heart smile.`;
+  return `One memory with ${name} has outgrown its place in time; it returns whenever the heart needs proof that beautiful days really happened.`;
+}
+
+const timelinePoetry = [
+  'The day an ordinary date quietly became part of the story.',
+  'A little chapter that still glows when memory turns back to it.',
+  'One more reason this journey could never be called ordinary.',
+  'A milestone made meaningful by the hearts that reached it together.',
+];
 
 function relationshipArchetype(data: FormData): NonNullable<GreetingContent['theme']['archetype']> {
   const relationship = data.relationship.toLowerCase();
@@ -86,12 +109,21 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
     celebration: `Today feels brighter because it gets to pause, look at ${name}, and celebrate the person behind all that light.`,
   };
 
+  const storyOpeners: Record<typeof archetype, string> = {
+    romance: `Somewhere along the way, the smallest moments with ${name} became the ones my heart began saving most carefully.`,
+    family: `The love ${name} gives has never needed a spotlight; it can be felt in the traditions, reassurances, and quiet care that hold a family together.`,
+    friendship: `The best part of knowing ${name} is how easily a simple day can collect the kind of details that become an inside story for years.`,
+    achievement: `Long before this milestone had a name, ${name} was building it through choices that looked small to the world and brave to those who truly noticed.`,
+    comfort: `There are seasons when love is best expressed as patience, presence, and a gentle reminder that ${name} never has to carry everything alone.`,
+    celebration: `A meaningful celebration looks beyond the calendar and notices all the little ways ${name} has made the journey worth cheering for.`,
+  };
+
   const story = [
-    relationshipOpeners[archetype],
-    data.personalityDescription && `To know ${name} is to notice something immediately — ${lowerFirst(data.personalityDescription.trim())}`,
-    data.whatMakesThemSpecial && `What stays with people long after the moment passes — ${lowerFirst(data.whatMakesThemSpecial.trim())}`,
-    data.bestMoment && `One memory keeps finding its way back with a glow of its own — ${data.bestMoment.trim()}`,
-    data.dreamGoal && `Ahead, one dream is waiting to meet ${name}'s courage — ${data.dreamGoal.trim()}`,
+    storyOpeners[archetype],
+    authoredPersonality(data, name),
+    authoredMemory(data, name),
+    data.achievement && `There is a hard-won chapter behind this celebration, and it deserves to be remembered not only for the result, but for the courage ${name} carried all the way there.`,
+    data.dreamGoal && `A dream is waiting beyond this page, and if hope had a favorite person to bet on, it would surely choose ${name}.`,
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -140,18 +172,19 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
     },
     data.favoriteFood && { title: 'The comfort order', description: foodHighlight(data.favoriteFood, name), emoji: '✨' },
     data.favoriteHobby && { title: 'In their element', description: `${capitalizeFirst(data.favoriteHobby)} is where time slows down and ${name} looks completely at home.`, emoji: '✦' },
-    data.achievement && { title: 'Proud is an understatement', description: data.achievement, emoji: '↗' },
+    data.achievement && { title: 'Proud is an understatement', description: `${name} turned persistence into a chapter worth standing up for.`, emoji: '↗' },
     { title: 'Their real superpower', description: superpowerDescriptions[archetype], emoji: archetype === 'family' ? '⌂' : '♡' },
   ].filter(Boolean) as GreetingContent['memoryHighlights'];
 
   return {
     recipientName: data.recipientName,
+    presentedBy: data.senderName,
     heroHeadline: heroHeadlines[archetype],
     greetingMessage: relationshipOpeners[archetype],
     story,
-    letter: data.personalLetter || defaultLetters[archetype],
-    quotes: [data.favoriteQuote, originalQuotes[archetype]].filter(Boolean) as string[],
-    timeline: data.timeline.slice(0, 8).map((milestone) => ({ date: milestone.date, caption: milestone.caption })),
+    letter: defaultLetters[archetype],
+    quotes: [originalQuotes[archetype]],
+    timeline: data.timeline.slice(0, 8).map((milestone, index) => ({ date: milestone.date, caption: timelinePoetry[index % timelinePoetry.length] })),
     gallery: data.photos.slice(0, 12).map((url, index) => ({ url, caption: index === 0 ? 'A moment worth keeping' : undefined })),
     memoryHighlights: highlightCandidates.slice(0, 5),
     theme: {

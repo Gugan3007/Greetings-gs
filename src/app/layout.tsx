@@ -53,6 +53,7 @@ export default function RootLayout({
     >
       <body className="noise-overlay min-h-full flex flex-col">
         <Providers>{children}</Providers>
+        <span className="gs-watermark" aria-hidden="true">-GS</span>
       </body>
     </html>
   );
