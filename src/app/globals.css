@@ -155,31 +155,61 @@ body {
   box-shadow: 0 30px 100px color-mix(in srgb, var(--greeting-accent) 12%, transparent);
 }
 
-.word-train {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.18em 0.28em;
-  text-wrap: balance;
-}
-
-.word-train__car {
+.letter-rain {
   position: relative;
   display: inline-flex;
-  align-items: baseline;
-  border-radius: 0.32em;
-  padding: 0.02em 0.06em 0.08em;
-  background: linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--greeting-accent) 15%, transparent));
-  will-change: transform, opacity;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.14em 0.3em;
+  text-wrap: balance;
+  isolation: isolate;
 }
 
-.word-train__coupler {
+.letter-rain__word {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.letter-rain__glyph {
+  position: relative;
+  display: inline-block;
+  will-change: transform, opacity;
+  transition: text-shadow 500ms ease;
+}
+
+.letter-rain[data-assembled="true"] .letter-rain__glyph {
+  text-shadow: 0 0 24px color-mix(in srgb, var(--greeting-accent) 24%, transparent);
+  will-change: auto;
+}
+
+.letter-rain__cloud {
   position: absolute;
-  top: 54%;
-  right: -0.23em;
-  width: 0.18em;
-  height: 1px;
-  background: color-mix(in srgb, var(--greeting-accent) 48%, transparent);
+  top: -1.45em;
+  left: 50%;
+  z-index: -1;
+  width: min(11em, 78vw);
+  height: 1.8em;
+  transform: translateX(-50%);
+  opacity: 0.4;
+  transition: opacity 700ms ease, transform 900ms ease;
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.letter-rain__cloud span {
+  position: absolute;
+  bottom: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--greeting-accent) 50%, rgba(255, 255, 255, 0.3));
+}
+
+.letter-rain__cloud span:nth-child(1) { left: 8%; width: 46%; height: 70%; }
+.letter-rain__cloud span:nth-child(2) { left: 34%; width: 38%; height: 100%; }
+.letter-rain__cloud span:nth-child(3) { right: 7%; width: 42%; height: 62%; }
+
+.letter-rain[data-assembled="true"] .letter-rain__cloud {
+  opacity: 0;
+  transform: translate(-50%, -0.8em) scale(1.08);
 }
 
 .dedication-card {
