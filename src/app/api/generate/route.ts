@@ -10,23 +10,9 @@ import { buildSystemPrompt } from '@/lib/ai/prompt';
 import { createPersonalizedMock } from '@/lib/ai/mock';
 import { dedupeGreetingContent } from '@/lib/ai/dedupe';
 import { persistGreeting } from '@/lib/greetings/repository';
+import { buildShareUrl } from '@/lib/greetings/share-url';
 
 export const maxDuration = 60; // 60 seconds max duration for AI generation
-
-function getShareUrl(request: Request, slug: string) {
-  const configuredSite = process.env.NEXT_PUBLIC_SITE_URL;
-  if (configuredSite && !configuredSite.includes('localhost')) {
-    return `${configuredSite.replace(/\/$/, '')}/g/${slug}`;
-  }
-
-  const requestUrl = new URL(request.url);
-  const localAddress = Object.values(networkInterfaces())
-    .flat()
-    .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
-  const hostname = localAddress || requestUrl.hostname;
-  const port = requestUrl.port ? `:${requestUrl.port}` : '';
-  return `${requestUrl.protocol}//${hostname}${port}/g/${slug}`;
-}
 
 export async function POST(req: Request) {
   try {
@@ -44,6 +30,15 @@ export async function POST(req: Request) {
     const formData = parsed.data;
     const slug = nanoid(10); // Generate unique URL slug
     const ownerToken = nanoid(32);
+    const localAddress = Object.values(networkInterfaces())
+      .flat()
+      .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
+    const share = buildShareUrl({
+      requestUrl: req.url,
+      slug,
+      configuredSite: process.env.NEXT_PUBLIC_SITE_URL,
+      lanAddress: localAddress,
+    });
 
     // TODO: Handle Image Uploads to Supabase Storage here
     // For now, we pass the data URIs through (or ignore them for the AI prompt)
@@ -87,7 +82,8 @@ export async function POST(req: Request) {
       success: true,
       slug,
       ownerToken,
-      shareUrl: getShareUrl(req, slug),
+      shareUrl: share.url,
+      shareScope: share.scope,
     });
 
   } catch (error) {

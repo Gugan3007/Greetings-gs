@@ -143,6 +143,7 @@ export function ProcessingScreen() {
           slug: data.slug,
           ownerToken: data.ownerToken,
           shareUrl: data.shareUrl,
+          shareScope: data.shareScope,
         };
 
         try {

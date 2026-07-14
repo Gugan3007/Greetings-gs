@@ -80,6 +80,9 @@ export default function GreetingPage() {
           <div className="mx-auto max-w-md px-6 text-center">
             <p className="font-display text-2xl font-semibold">This greeting is no longer available here.</p>
             <p className="mt-3 text-sm text-fg-secondary">Ask the sender for a fresh link, or keep their computer server running while opening a local link.</p>
+            <a href="/create?new=1" className="mt-6 inline-flex rounded-full bg-gradient-to-r from-accent-purple to-accent-blue px-5 py-2.5 text-sm font-semibold text-white">
+              Create a new greeting
+            </a>
           </div>
         ) : (
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-purple border-t-transparent" />

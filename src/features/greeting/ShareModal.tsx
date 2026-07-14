@@ -28,6 +28,17 @@ interface ShareModalProps {
 export function ShareModal({ isOpen, onClose, url, title }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
+  const isLocalLink = (() => {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol !== 'https:' ||
+        parsed.hostname === 'localhost' ||
+        parsed.hostname === '127.0.0.1' ||
+        /^10\.|^192\.168\.|^172\.(1[6-9]|2\d|3[01])\./.test(parsed.hostname);
+    } catch {
+      return true;
+    }
+  })();
 
   const legacyCopy = () => {
     const input = document.createElement('textarea');
@@ -135,6 +146,16 @@ export function ShareModal({ isOpen, onClose, url, title }: ShareModalProps) {
                   <X className="h-5 w-5" />
                 </button>
               </div>
+
+              <p className={`mb-4 rounded-[var(--radius-md)] border px-3 py-2 text-center text-xs ${
+                isLocalLink
+                  ? 'border-amber-400/25 bg-amber-400/10 text-amber-200'
+                  : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
+              }`}>
+                {isLocalLink
+                  ? 'Local preview · same Wi-Fi and a running Mac are required.'
+                  : 'Public HTTPS link · opens on any phone or network.'}
+              </p>
 
               {/* URL Copy Box */}
               <div className="mb-8 flex items-center gap-2 rounded-[var(--radius-md)] border border-glass-border bg-background p-2">
