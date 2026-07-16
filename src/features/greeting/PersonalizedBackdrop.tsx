@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import type { GreetingContent } from '@/lib/ai/schema';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { buildBackdropMotifs } from './personalized-backdrop';
 
 const archetypeSymbols = {
   romance: ['♡', '✦', 'FLAMES'],
@@ -16,7 +17,7 @@ const archetypeSymbols = {
 export function PersonalizedBackdrop({ data }: { data: GreetingContent }) {
   const reducedMotion = useReducedMotion();
   const archetype = data.theme.archetype || 'celebration';
-  const motifs = [...(data.theme.motifs || []), ...archetypeSymbols[archetype]].slice(0, 8);
+  const motifs = [...buildBackdropMotifs(data), ...archetypeSymbols[archetype]].slice(0, 10);
   const motifText = motifs.join(' ').toLowerCase();
   const glyphs = [
     motifText.includes('paw') || motifText.includes('dog') || motifText.includes('cat') ? '🐾' : null,
@@ -42,6 +43,26 @@ export function PersonalizedBackdrop({ data }: { data: GreetingContent }) {
             transition={{ duration: 10 + index * 2, repeat: Infinity, ease: 'easeInOut' }}
           >
             {glyphs[index % Math.max(glyphs.length, 1)] || '✦'}
+          </motion.span>
+        ))}
+      </div>
+      <div className="absolute inset-0 hidden sm:block">
+        {motifs.slice(0, 6).map((motif, index) => (
+          <motion.span
+            key={`ambient-${motif}-${index}`}
+            className="absolute max-w-44 text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--greeting-accent)] opacity-[0.08]"
+            style={{
+              left: `${14 + ((index * 17) % 68)}%`,
+              top: `${16 + ((index * 23) % 70)}%`,
+            }}
+            animate={reducedMotion ? undefined : {
+              x: [0, index % 2 === 0 ? 18 : -18, 0],
+              y: [0, index % 2 === 0 ? -22 : 22, 0],
+              opacity: [0.045, 0.11, 0.045],
+            }}
+            transition={{ duration: 14 + index * 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            {motif}
           </motion.span>
         ))}
       </div>
