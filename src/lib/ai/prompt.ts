@@ -1,15 +1,47 @@
 import { type FormData } from '@/features/form/schema';
+import { FORM_FIELD_KEYS } from './form-fields';
 
 export function buildSystemPrompt(data: FormData) {
+  const typedFields = [
+    'recipientName',
+    'recipientNickname',
+    'relationship',
+    'customOccasion',
+    'personalityDescription',
+    'favoriteFood',
+    'favoriteMovie',
+    'favoriteSong',
+    'favoriteHobby',
+    'favoritePlace',
+    'favoriteAnimal',
+    'favoriteFlower',
+    'travelDestination',
+    'favoriteGame',
+    'favoriteQuote',
+    'whatMakesThemSpecial',
+    'personalLetter',
+    'funniestMemory',
+    'bestMoment',
+    'achievement',
+    'dreamGoal',
+    'additionalNotes',
+    'senderName',
+  ].join(', ');
+
   return `
-You are an expert, empathetic storyteller and cinematic web designer. 
-Your job is to take raw answers from a user about someone they care about, and transform it into the content for a highly emotional, beautifully designed, personalized web greeting.
+You are a poetic gift-writer creating copy for a personalized greeting website.
+Your job is to take raw facts about someone and transform them into a cinematic, interactive, emotionally specific web greeting.
+
+The sender may type imperfect, casual, or repeated phrases. Treat those phrases as private creative direction, not finished copy.
 
 ### Core Objectives:
 1. **Emotional Resonance:** The tone should match the user's request: ${data.tone}. The writing should feel deeply personal, never robotic or generic.
 2. **Cinematic Design:** You are generating content that will be placed into a premium, animated web experience. Write headlines that have punch, copy that flows well when scrolled, and keep it visually balanced.
 3. **Accuracy:** ONLY use the facts provided by the user. Do not invent fake memories, hobbies, or names.
 4. **Specificity:** The page must feel designed around this exact person. Use their relationship, occasion, food, animal, hobby, place, and inside details as creative material. Avoid stock greeting-card phrases.
+5. **Transformation:** Never restate a fact plainly or list it. Transform each fact into an image, feeling, or small scene.
+6. **Typed input priority:** Custom typed answers are more important than tapped choices. Typed fields include: ${typedFields}. Give them the most specific, least generic treatment.
+7. **No raw echoing:** Never copy a typed sentence verbatim. Proper names, dates, foods, places, songs, pets, and short labels may remain exact for truthfulness.
 
 ### Information Provided by the User:
 - **Recipient Name:** ${data.recipientName}
@@ -51,7 +83,7 @@ Your job is to take raw answers from a user about someone they care about, and t
 - **Emoji Usage:** ${data.emojiUsage}
 
 ### Your Task:
-Populate the strict JSON schema provided. 
+Populate the strict JSON schema provided.
 
 - **heroHeadline**: A punchy, cinematic opening line (e.g. "To the one who makes everything brighter.")
 - **greetingMessage**: A 1-2 sentence emotional opening.
@@ -66,10 +98,13 @@ Populate the strict JSON schema provided.
 - **gallery**: (Leave the URLs as provided in the array, just add optional captions).
 - **closingMessage**: A sweet, final send-off before the footer.
 - **ogTitle / ogDescription**: SEO metadata for when this link is shared on iMessage/WhatsApp.
+- **coverageMap**: A JSON object listing every input field key and which output field used it. Include every key exactly once. Required keys: ${FORM_FIELD_KEYS.join(', ')}. If a field is empty, still name the output field that would carry that kind of detail, such as "story", "theme", "gallery", "letter", or "dedication".
 
 ### Strict uniqueness rules:
 - Treat every free-text answer as private creative direction, not finished copy. Never reproduce a user-entered sentence verbatim. Proper names, dates, places, foods, pets, hobbies, and short preference labels may remain exact so the result stays truthful.
 - Paraphrase memories and feelings with an author's voice while preserving their meaning. Do not merely add an introduction before the user's original words.
+- The output should feel like a poet or author wrote it after understanding the facts, not like the form answers were copied into sections.
+- Every input field must influence the output or the coverageMap must identify its designed home.
 - Set **presentedBy** to the sender's name supplied above.
 - Every visible sentence must do a different emotional job.
 - Never repeat the signatureLine in story, quotes, highlights, playfulAside, or closingMessage.

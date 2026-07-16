@@ -61,6 +61,7 @@ export const greetingContentSchema = z.object({
   playfulAside: z.string().max(220).optional(),
   ogTitle: z.string().max(70),
   ogDescription: z.string().max(160),
+  coverageMap: z.record(z.string(), z.string()).default({}),
 });
 
 export type GreetingContent = z.infer<typeof greetingContentSchema>;

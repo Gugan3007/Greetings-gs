@@ -21,6 +21,7 @@ const content: GreetingContent = {
   closingMessage: 'With love.',
   ogTitle: 'For Maya',
   ogDescription: 'A greeting for Maya.',
+  coverageMap: {},
 };
 
 const input = {

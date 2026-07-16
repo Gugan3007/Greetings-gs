@@ -1,5 +1,6 @@
 import type { FormData } from '@/features/form/schema';
 import type { GreetingContent } from './schema';
+import { buildCoverageMap } from './form-fields';
 
 const includesAny = (value: string, terms: string[]) =>
   terms.some((term) => value.toLowerCase().includes(term));
@@ -91,6 +92,43 @@ function foodHighlight(food: string, name: string) {
   return `${name}'s comfort pick, deserving of a place in this story all its own.`;
 }
 
+function companionshipLine(data: FormData, name: string, archetype: NonNullable<GreetingContent['theme']['archetype']>) {
+  const source = `${data.personalLetter} ${data.whatMakesThemSpecial} ${data.additionalNotes}`.toLowerCase();
+  if (includesAny(source, ['always', 'wherever', 'whenever', 'there with you', 'with you'])) {
+    if (archetype === 'romance') return `Wherever life decides to turn next, I want my place to be the quiet one beside ${name} — close enough for the hard days, playful enough for the good ones.`;
+    if (archetype === 'family') return `Wherever the road bends, ${name} deserves the steady kind of love that keeps showing up without needing to be asked.`;
+    return `${name} should never have to wonder where the support is; it is walking close, cheering softly, and staying near through every turn.`;
+  }
+  if (includesAny(source, ['safe', 'comfort', 'calm'])) return `${name} has a way of making care feel like a safe place to return to, and this page returns that warmth in its own small way.`;
+  if (includesAny(source, ['laugh', 'funny', 'teasing'])) return `Even the silly moments with ${name} know how to become keepsakes, carrying laughter long after the moment has passed.`;
+  return `The feeling behind these words is simple but not small: ${name} is deeply noticed, warmly chosen, and held in a story that keeps making room for more.`;
+}
+
+function letterCompanionshipLine(data: FormData, name: string, archetype: NonNullable<GreetingContent['theme']['archetype']>) {
+  const source = `${data.personalLetter} ${data.whatMakesThemSpecial} ${data.additionalNotes}`.toLowerCase();
+  if (includesAny(source, ['always', 'wherever', 'whenever', 'there with you', 'with you'])) {
+    if (archetype === 'romance') return `I cannot promise that every day will be easy, but I can promise this: you will never have to look too far to find me choosing your side.`;
+    if (archetype === 'family') return `May you always feel love close enough to lean on, especially on the days that ask for more courage than usual.`;
+    return `Whatever changes around you, let this be one steady truth: you are not being cheered for from a distance.`;
+  }
+  if (includesAny(source, ['safe', 'comfort', 'calm'])) return `You have given so much calm to others; I hope this page gives a little of that peace back to you.`;
+  if (includesAny(source, ['laugh', 'funny', 'teasing'])) return `I hope we keep collecting the kind of laughter that refuses to stay small.`;
+  return `I hope these words make you feel what the form could only point toward: how fully and carefully you are loved.`;
+}
+
+function preferenceScene(data: FormData, name: string) {
+  const scenes: string[] = [];
+  if (data.favoriteAnimal) {
+    scenes.push(includesAny(data.favoriteAnimal, ['dog', 'puppy'])
+      ? `Even the imagined paw prints around this page feel right for ${name}, because every soft-hearted detail seems to know where it belongs.`
+      : `A little trace of ${data.favoriteAnimal} belongs in this story, because ${name}'s favorite things deserve more than a passing mention.`);
+  }
+  if (data.favoriteFood && !includesAny(data.favoriteFood, ['porotta', 'parotta', 'biryani', 'biriyani'])) {
+    scenes.push(`${capitalizeFirst(data.favoriteFood)} becomes part of the scene too, not as a label, but as one more flavor of how ${name} likes joy to arrive.`);
+  }
+  return scenes.join('\n\n');
+}
+
 export function createPersonalizedMock(data: FormData): GreetingContent {
   const name = data.recipientNickname?.trim() || data.recipientName;
   const archetype = relationshipArchetype(data);
@@ -121,6 +159,8 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
   const story = [
     storyOpeners[archetype],
     authoredPersonality(data, name),
+    companionshipLine(data, name, archetype),
+    preferenceScene(data, name),
     authoredMemory(data, name),
     data.achievement && `There is a hard-won chapter behind this celebration, and it deserves to be remembered not only for the result, but for the courage ${name} carried all the way there.`,
     data.dreamGoal && `A dream is waiting beyond this page, and if hope had a favorite person to bet on, it would surely choose ${name}.`,
@@ -156,12 +196,12 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
   };
 
   const defaultLetters: Record<typeof archetype, string> = {
-    romance: `Dear ${name},\n\nThank you for making love feel less like a grand promise and more like a thousand beautiful choices we keep making. I hope every road ahead gives us new reasons to laugh, grow, and choose each other again.`,
-    family: `Dear ${name},\n\nSo much of what feels steady, generous, and good in our lives carries your fingerprints. May this next chapter return even a little of the care you have given so freely.`,
-    friendship: `Dear ${name},\n\nThank you for being the person who can hold both the serious stories and the ridiculous ones. Life is kinder, funnier, and far more memorable with you in it.`,
-    achievement: `Dear ${name},\n\nI hope you pause long enough to see what the rest of us see: courage that kept moving, even before anyone applauded. This moment is yours — and it is only the beginning.`,
-    comfort: `Dear ${name},\n\nYou do not have to be strong every minute. Let today be gentle, let love do some of the carrying, and remember how many people are quietly standing beside you.`,
-    celebration: `Dear ${name},\n\nMay the chapter ahead surprise you with good people, brave beginnings, and ordinary days that become favorite memories without warning.`,
+    romance: `Dear ${name},\n\nThank you for making love feel less like a grand promise and more like a thousand beautiful choices we keep making. ${letterCompanionshipLine(data, name, archetype)} I hope every road ahead gives us new reasons to laugh, grow, and choose each other again.`,
+    family: `Dear ${name},\n\nSo much of what feels steady, generous, and good in our lives carries your fingerprints. ${letterCompanionshipLine(data, name, archetype)} May this next chapter return even a little of the care you have given so freely.`,
+    friendship: `Dear ${name},\n\nThank you for being the person who can hold both the serious stories and the ridiculous ones. ${letterCompanionshipLine(data, name, archetype)} Life is kinder, funnier, and far more memorable with you in it.`,
+    achievement: `Dear ${name},\n\nI hope you pause long enough to see what the rest of us see: courage that kept moving, even before anyone applauded. ${letterCompanionshipLine(data, name, archetype)} This moment is yours, and it is only the beginning.`,
+    comfort: `Dear ${name},\n\nYou do not have to be strong every minute. ${letterCompanionshipLine(data, name, archetype)} Let today be gentle, let love do some of the carrying, and remember how many people are quietly standing beside you.`,
+    celebration: `Dear ${name},\n\n${letterCompanionshipLine(data, name, archetype)} May the chapter ahead surprise you with good people, brave beginnings, and ordinary days that become favorite memories without warning.`,
   };
 
   const highlightCandidates = [
@@ -211,5 +251,6 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
           : `Made from the details that make ${name}, ${name}.`,
     ogTitle: `A special greeting for ${data.recipientName}`,
     ogDescription: signatureLine.slice(0, 160),
+    coverageMap: buildCoverageMap(),
   };
 }
