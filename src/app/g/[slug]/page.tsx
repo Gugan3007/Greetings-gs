@@ -12,6 +12,7 @@ import { GreetingGallery } from '@/features/greeting/GreetingGallery';
 import { GreetingLetter } from '@/features/greeting/GreetingLetter';
 import { GreetingSignature } from '@/features/greeting/GreetingSignature';
 import { GreetingDedication } from '@/features/greeting/GreetingDedication';
+import { GreetingPersonalDetails } from '@/features/greeting/GreetingPersonalDetails';
 import { PersonalizedBackdrop } from '@/features/greeting/PersonalizedBackdrop';
 import { ShareModal } from '@/features/greeting/ShareModal';
 import { Heart, Share2 } from 'lucide-react';
@@ -116,6 +117,7 @@ export default function GreetingPage() {
         <GreetingSignature data={data} />
         <GreetingNarrative data={data} />
         <GreetingHighlights data={data} />
+        <GreetingPersonalDetails data={data} />
         <GreetingTimeline data={data} />
         <GreetingGallery data={data} />
         <GreetingLetter data={data} />

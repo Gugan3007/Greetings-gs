@@ -90,6 +90,7 @@ Populate the strict JSON schema provided.
 - **story**: A beautifully written narrative (3-4 paragraphs) synthesizing their personality, what makes them special, and your memories. 
 - **letter**: Re-author the meaning of the user's notes as a polished, heartfelt letter. Never copy their wording sentence-for-sentence. If none was provided, write a short, relationship-appropriate letter.
 - **quotes**: Pull out 2-3 of the most impactful sentences from the story or letter to use as large pull-quotes.
+- **personalizedDetails**: Create one visible authored detail line for every non-empty input field. This is where choices and custom text both prove they were used. Each item must include field, label, and line. Example for favoriteColor=blue: write a cute line that turns blue into a feeling, such as sky, ocean, calm, trust, or falling for them. Do not copy this example verbatim.
 - **memoryHighlights**: Create 3-6 short, punchy highlights based on their favorites, achievements, or funny memories. (e.g. "Master of [Hobby]", "Always quoting [Movie]").
 - **theme**: Recommend an accent color and an emotional archetype. Use romance for partners, family for parents/siblings, friendship for friends, achievement for graduation/congratulations, comfort for get-well, otherwise celebration. Add 3-6 short visual motifs grounded in real preferences (for example paw prints for a dog lover, flaky layers for a porotta lover, flowers for a gardener). Add a short themeLabel that connects the occasion and person.
 - **signatureLine**: Write one original, charming hook rooted in a real preference. Wordplay is welcome. Example pattern only: for porotta, something about love or joy having beautiful layers. Never reuse the example verbatim unless porotta was actually supplied.
@@ -105,6 +106,7 @@ Populate the strict JSON schema provided.
 - Paraphrase memories and feelings with an author's voice while preserving their meaning. Do not merely add an introduction before the user's original words.
 - The output should feel like a poet or author wrote it after understanding the facts, not like the form answers were copied into sections.
 - Every input field must influence the output or the coverageMap must identify its designed home.
+- Every non-empty input field must appear in **personalizedDetails** as a fresh line. Do not skip technical-looking fields such as tone, deviceTarget, photoLayout, or mediaConsent; translate them into what they changed about the page.
 - Set **presentedBy** to the sender's name supplied above.
 - Every visible sentence must do a different emotional job.
 - Never repeat the signatureLine in story, quotes, highlights, playfulAside, or closingMessage.

@@ -15,6 +15,12 @@ export const greetingGalleryItemSchema = z.object({
   caption: z.string().max(200).optional(),
 });
 
+export const personalizedDetailSchema = z.object({
+  field: z.string(),
+  label: z.string().max(80),
+  line: z.string().max(260),
+});
+
 export const greetingThemeSchema = z.object({
   mode: z.enum(['light', 'dark']),
   accent: z.enum(['purple', 'blue', 'roseGold']),
@@ -39,6 +45,7 @@ export const greetingContentSchema = z.object({
   quotes: z.array(z.string().max(300)).max(5),
   timeline: z.array(greetingTimelineItemSchema).max(12),
   gallery: z.array(greetingGalleryItemSchema).max(20),
+  personalizedDetails: z.array(personalizedDetailSchema).max(60).default([]),
   memoryHighlights: z
     .array(
       z.object({

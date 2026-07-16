@@ -16,6 +16,7 @@ const content: GreetingContent = {
   quotes: ['Some people make a day worth remembering.'],
   timeline: [],
   gallery: [],
+  personalizedDetails: [],
   memoryHighlights: [],
   theme: { mode: 'dark', accent: 'purple', density: 'luxury' },
   closingMessage: 'With love.',

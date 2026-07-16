@@ -60,6 +60,8 @@ function FieldRenderer({ field, value, onChange, accentColor }: FieldRendererPro
           onChange={onChange}
         />
       );
+    case 'choice-text':
+      return <ChoiceTextField field={field} value={value as string} onChange={onChange} />;
     case 'timeline':
       return (
         <TimelineField
@@ -81,6 +83,67 @@ function FieldRenderer({ field, value, onChange, accentColor }: FieldRendererPro
     default:
       return <TextField field={field} value={value as string} onChange={onChange} />;
   }
+}
+
+function ChoiceTextField({
+  field,
+  value,
+  onChange,
+}: {
+  field: FormField;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const options = field.options || [];
+  const normalizedValue = (value || '').trim().toLowerCase();
+
+  return (
+    <div className="space-y-3 text-center">
+      <label className="block text-sm font-medium text-foreground">
+        {field.label}
+        {field.required && <span className="ml-1 text-accent-rose">*</span>}
+      </label>
+      <div className="flex flex-wrap justify-center gap-2">
+        {options.map((opt) => {
+          const isSelected = normalizedValue === opt.value.toLowerCase();
+
+          return (
+            <motion.button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={cn(
+                'rounded-full border px-3 py-2 text-sm font-semibold transition-all duration-200',
+                isSelected
+                  ? 'border-accent-purple bg-accent-purple/15 text-foreground'
+                  : 'border-glass-border bg-glass-bg text-fg-secondary hover:border-white/20 hover:text-foreground'
+              )}
+              whileTap={{ scale: 0.96 }}
+            >
+              {opt.label}
+            </motion.button>
+          );
+        })}
+      </div>
+      <input
+        type="text"
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={field.placeholder}
+        maxLength={field.maxLength}
+        className={cn(
+          'w-full rounded-[var(--radius-md)] border border-glass-border bg-glass-bg px-4 py-3',
+          'text-center text-foreground placeholder:text-fg-muted',
+          'transition-all duration-200',
+          'focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple/50',
+          'hover:border-[rgba(255,255,255,0.15)]'
+        )}
+      />
+      {field.helperText && (
+        <p className="text-xs text-fg-muted">{field.helperText}</p>
+      )}
+    </div>
+  );
 }
 
 // ─── Text Input ──────────────────────────────────────────────────────────────

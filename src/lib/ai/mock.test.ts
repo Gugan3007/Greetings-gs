@@ -53,6 +53,23 @@ describe('createPersonalizedMock', () => {
     expect(visibleCopy).toMatch(/beside|choose|with you|near/i);
   });
 
+  it('turns every non-empty input into a visible authored detail line', () => {
+    const result = createPersonalizedMock(richInput);
+    const detailsByField = new Map(result.personalizedDetails.map((detail) => [detail.field, detail.line]));
+
+    expect(detailsByField.get('favoriteColor')).toMatch(/blue/i);
+    expect(detailsByField.get('favoriteColor')).toMatch(/sky|ocean|calm|heart|blush/i);
+    expect(detailsByField.get('favoriteFood')).toMatch(/porotta/i);
+    expect(detailsByField.get('favoriteAnimal')).toMatch(/paw|dog/i);
+    expect(detailsByField.get('personalLetter')).not.toContain(richInput.personalLetter);
+
+    const requiredFields = Object.entries(richInput)
+      .filter(([, value]) => value !== '' && value !== undefined && value !== false && (!Array.isArray(value) || value.length > 0))
+      .map(([key]) => key);
+
+    expect([...detailsByField.keys()]).toEqual(expect.arrayContaining(requiredFields));
+  });
+
   it('does not repeat full sentences across the story and letter', () => {
     const result = createPersonalizedMock(richInput);
     const storySentences = new Set(

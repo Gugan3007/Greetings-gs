@@ -1,6 +1,7 @@
 import type { FormData } from '@/features/form/schema';
 import type { GreetingContent } from './schema';
 import { buildCoverageMap } from './form-fields';
+import { buildPersonalizedDetails } from './personalized-details';
 
 const includesAny = (value: string, terms: string[]) =>
   terms.some((term) => value.toLowerCase().includes(term));
@@ -226,6 +227,7 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
     quotes: [originalQuotes[archetype]],
     timeline: data.timeline.slice(0, 8).map((milestone, index) => ({ date: milestone.date, caption: timelinePoetry[index % timelinePoetry.length] })),
     gallery: data.photos.slice(0, 12).map((url, index) => ({ url, caption: index === 0 ? 'A moment worth keeping' : undefined })),
+    personalizedDetails: buildPersonalizedDetails(data),
     memoryHighlights: highlightCandidates.slice(0, 5),
     theme: {
       mode: data.themeMode,
