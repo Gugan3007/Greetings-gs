@@ -16,7 +16,7 @@ function compactMotif(value: string) {
     .replace(/^[^\p{L}\p{N}]+/u, '')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 36);
+    .slice(0, 22);
 }
 
 function extractDetailMotif(field: string, line: string) {
@@ -58,5 +58,5 @@ export function buildBackdropMotifs(data: GreetingContent) {
     if (motif) motifSet.add(motif);
   }
 
-  return [...motifSet].slice(0, 10);
+  return [...motifSet].slice(0, 6);
 }

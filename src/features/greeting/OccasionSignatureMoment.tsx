@@ -126,7 +126,7 @@ function CapModel({ progress, reducedMotion, briefcase = false }: { progress: nu
 function ThreeStage({ progress, reducedMotion, family }: VisualProps & { family: Extract<VisualFamily, 'ring' | 'cap' | 'briefcase'> }) {
   return (
     <div className="absolute inset-0">
-      <Canvas camera={{ position: [0, 0.2, 5.2], fov: 42 }} shadows dpr={[1, 1.65]}>
+      <Canvas camera={{ position: [0, 0.2, 5.2], fov: 42 }} shadows dpr={[1, 1.25]} performance={{ min: 0.55 }}>
         <ambientLight intensity={0.65} />
         <spotLight position={[2.8, 4, 3]} angle={0.4} penumbra={0.8} intensity={2.6} castShadow />
         <pointLight position={[-3, 1.8, 2]} intensity={1.1} color="#8fb7ff" />
@@ -142,7 +142,7 @@ function ThreeStage({ progress, reducedMotion, family }: VisualProps & { family:
 
 function BirthdayBalloons({ progress, reducedMotion }: VisualProps) {
   const balloons = useMemo(
-    () => Array.from({ length: 28 }, (_, index) => ({
+    () => Array.from({ length: 18 }, (_, index) => ({
       left: (index * 23) % 100,
       size: 42 + (index % 6) * 13,
       depth: 0.55 + (index % 5) * 0.12,
@@ -152,7 +152,7 @@ function BirthdayBalloons({ progress, reducedMotion }: VisualProps) {
     })),
     []
   );
-  const confetti = useMemo(() => Array.from({ length: 38 }, (_, index) => ({
+  const confetti = useMemo(() => Array.from({ length: 24 }, (_, index) => ({
     left: 12 + ((index * 19) % 76),
     top: 42 + ((index * 13) % 24),
     hue: [45, 210, 320, 145, 275][index % 5],
@@ -173,10 +173,11 @@ function BirthdayBalloons({ progress, reducedMotion }: VisualProps) {
             className="absolute"
             style={{
               left: `${balloon.left}%`,
-              top: `${y}%`,
-              transform: `translateX(${sway}px) rotate(${balloon.tilt}deg) scale(${pulse * balloon.depth})`,
+              top: 0,
+              transform: `translate3d(${sway}px, ${y}svh, 0) rotate(${balloon.tilt}deg) scale(${pulse * balloon.depth})`,
               filter: balloon.depth < 0.8 ? 'blur(1.4px)' : undefined,
               opacity: 0.34 + balloon.depth * 0.62,
+              willChange: reducedMotion ? undefined : 'transform, opacity',
             }}
           >
             <div
@@ -201,9 +202,10 @@ function BirthdayBalloons({ progress, reducedMotion }: VisualProps) {
             style={{
               left: `${piece.left}%`,
               top: `${piece.top - burst * (10 + (index % 7) * 5)}%`,
-              transform: `rotate(${piece.rot + burst * 220}deg) scale(${burst})`,
+              transform: `translateZ(0) rotate(${piece.rot + burst * 220}deg) scale(${burst})`,
               background: `hsl(${piece.hue} 90% 64%)`,
               opacity: burst,
+              willChange: reducedMotion ? undefined : 'transform, opacity',
             }}
           />
         );
@@ -386,20 +388,24 @@ const VISUAL_RENDERERS: Record<VisualFamily, (props: VisualProps) => ReactElemen
 
 export function OccasionSignatureMoment({ data }: { data: GreetingContent }) {
   const sectionRef = useRef<HTMLElement>(null);
+  const lastProgressRef = useRef(0);
   const reducedMotionPreference = useReducedMotion();
   const reducedMotion = Boolean(reducedMotionPreference);
   const moment = data.signatureMoment || DEFAULT_MOMENT;
   const Visual = VISUAL_RENDERERS[moment.visualFamily] || VISUAL_RENDERERS.aurora;
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] });
   const [progress, setProgress] = useState(reducedMotion ? 1 : 0);
-  const textOpacity = useTransform(scrollYProgress, [0.2, 0.42, 0.9], [0, 1, 1]);
-  const textY = useTransform(scrollYProgress, [0.2, 0.52], [36, 0]);
+  const textOpacity = useTransform(scrollYProgress, [0.06, 0.24, 0.9], [0, 1, 1]);
+  const textY = useTransform(scrollYProgress, [0.06, 0.34], [28, 0]);
   const handoffScale = useTransform(scrollYProgress, [0.82, 1], [1, 0.94]);
   const handoffOpacity = useTransform(scrollYProgress, [0.88, 1], [1, 0.12]);
   const words = useMemo(() => splitWish(moment.wish), [moment.wish]);
 
   useMotionValueEvent(scrollYProgress, 'change', (value) => {
-    if (!reducedMotion) setProgress(value);
+    if (reducedMotion) return;
+    if (Math.abs(value - lastProgressRef.current) < 0.012 && value > 0.02 && value < 0.98) return;
+    lastProgressRef.current = value;
+    setProgress(value);
   });
 
   return (
@@ -411,7 +417,7 @@ export function OccasionSignatureMoment({ data }: { data: GreetingContent }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.055),transparent_34%)]" />
         <Visual progress={progress} reducedMotion={reducedMotion} accent="var(--greeting-accent)" />
         <motion.div
-          className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center"
+          className="relative z-10 mx-auto mt-24 flex max-w-5xl flex-col items-center text-center sm:mt-0"
           style={{ opacity: reducedMotion ? 1 : textOpacity, y: reducedMotion ? 0 : textY }}
         >
           <p className="mb-5 rounded-full border border-white/10 bg-black/35 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.34em] text-white/55 backdrop-blur-xl">
@@ -419,7 +425,7 @@ export function OccasionSignatureMoment({ data }: { data: GreetingContent }) {
           </p>
           <h2 className="max-w-4xl font-display text-4xl font-semibold leading-tight tracking-[-0.04em] text-white sm:text-6xl md:text-7xl">
             {words.map((word, index) => {
-              const reveal = reducedMotion ? 1 : easeOut((progress - 0.24 - index * 0.035) / 0.2);
+              const reveal = reducedMotion ? 1 : easeOut((progress - 0.08 - index * 0.026) / 0.18);
               return (
                 <span
                   key={`${word}-${index}`}

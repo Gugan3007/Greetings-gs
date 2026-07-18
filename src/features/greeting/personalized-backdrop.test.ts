@@ -38,6 +38,7 @@ describe('buildBackdropMotifs', () => {
 
     expect(motifs).toEqual(expect.arrayContaining(['blue', 'chicken', 'playing with pets']));
     expect(motifs).not.toContain('Favorite color');
-    expect(motifs.length).toBeLessThanOrEqual(10);
+    expect(motifs.every((motif) => motif.length <= 22)).toBe(true);
+    expect(motifs.length).toBeLessThanOrEqual(6);
   });
 });
