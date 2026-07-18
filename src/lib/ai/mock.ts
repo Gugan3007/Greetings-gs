@@ -2,6 +2,7 @@ import type { FormData } from '@/features/form/schema';
 import type { GreetingContent } from './schema';
 import { buildCoverageMap } from './form-fields';
 import { buildPersonalizedDetails } from './personalized-details';
+import { buildSignatureMoment } from './signature-moment';
 
 const includesAny = (value: string, terms: string[]) =>
   terms.some((term) => value.toLowerCase().includes(term));
@@ -240,6 +241,7 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
     music: data.backgroundMusic || undefined,
     closingMessage: archetype === 'romance' ? 'Still choosing you. Always.' : archetype === 'family' ? 'With all the love a home can hold.' : 'Keep shining exactly as you are.',
     signatureLine,
+    signatureMoment: buildSignatureMoment(data),
     playfulAside: archetype === 'romance'
       ? includesAny(data.favoriteFood, ['biryani', 'biriyani'])
         ? `A little spice, a lot of heart, and one person worth saving the last spoonful for.`

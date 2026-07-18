@@ -94,6 +94,12 @@ Populate the strict JSON schema provided.
 - **memoryHighlights**: Create 3-6 short, punchy highlights based on their favorites, achievements, or funny memories. (e.g. "Master of [Hobby]", "Always quoting [Movie]").
 - **theme**: Recommend an accent color and an emotional archetype. Use romance for partners, family for parents/siblings, friendship for friends, achievement for graduation/congratulations, comfort for get-well, otherwise celebration. Add 3-6 short visual motifs grounded in real preferences (for example paw prints for a dog lover, flaky layers for a porotta lover, flowers for a gardener). Add a short themeLabel that connects the occasion and person.
 - **signatureLine**: Write one original, charming hook rooted in a real preference. Wordplay is welcome. Example pattern only: for porotta, something about love or joy having beautiful layers. Never reuse the example verbatim unless porotta was actually supplied.
+- **signatureMoment**: Create the dedicated occasion-based scroll moment. Return an object with:
+  - key: a stable lowercase key. Use birthday, anniversary, wedding, graduation, get-well, farewell, congratulations, just-because, new-home, new-job, retirement, adoption-day, or sobriety-anniversary when appropriate.
+  - visualFamily: one of balloons, ring, cap, bouquet, airplane, fireworks, aurora, doorway, briefcase.
+  - occasionLabel: the human readable occasion label. If the user typed a custom occasion, preserve the short occasion name here.
+  - wish: a stylish, sweet occasion-specific line under 180 characters. It must sound authored, premium, and personal, not copied from the user's input.
+  Semantically map custom occasions to the nearest visual family: New Home → doorway, New Job → briefcase, Retirement/Farewell → airplane, Sobriety/Award/Win → fireworks, Adoption Day/quiet personal days → aurora. Only use aurora as a true fallback if nothing else fits.
 - **playfulAside**: One small delightful line that could live in a side rail. For a romantic relationship it can nod to FLAMES, constellations, or shared chemistry; for family, friendship, or formal relationships choose an appropriate device instead.
 - **timeline**: Reformat the provided timeline (if any) to be clean and punchy.
 - **gallery**: (Leave the URLs as provided in the array, just add optional captions).

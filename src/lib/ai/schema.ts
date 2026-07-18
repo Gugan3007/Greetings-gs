@@ -32,6 +32,23 @@ export const greetingThemeSchema = z.object({
   themeLabel: z.string().max(80).optional(),
 });
 
+export const signatureMomentSchema = z.object({
+  key: z.string().max(60),
+  visualFamily: z.enum([
+    'balloons',
+    'ring',
+    'cap',
+    'bouquet',
+    'airplane',
+    'fireworks',
+    'aurora',
+    'doorway',
+    'briefcase',
+  ]),
+  occasionLabel: z.string().max(80),
+  wish: z.string().max(180),
+});
+
 export const greetingContentSchema = z.object({
   // ── Core Content ─────────────────────────
   recipientName: z.string(),
@@ -66,6 +83,7 @@ export const greetingContentSchema = z.object({
   closingMessage: z.string().max(300),
   signatureLine: z.string().max(180).optional(),
   playfulAside: z.string().max(220).optional(),
+  signatureMoment: signatureMomentSchema.optional(),
   ogTitle: z.string().max(70),
   ogDescription: z.string().max(160),
   coverageMap: z.record(z.string(), z.string()).default({}),
@@ -75,3 +93,4 @@ export type GreetingContent = z.infer<typeof greetingContentSchema>;
 export type GreetingTheme = z.infer<typeof greetingThemeSchema>;
 export type GreetingTimelineItem = z.infer<typeof greetingTimelineItemSchema>;
 export type GreetingGalleryItem = z.infer<typeof greetingGalleryItemSchema>;
+export type GreetingSignatureMoment = z.infer<typeof signatureMomentSchema>;
