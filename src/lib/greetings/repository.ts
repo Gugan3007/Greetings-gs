@@ -26,6 +26,10 @@ type PersistGreetingInput = {
   ownerToken: string;
 };
 
+function requiresDurablePersistence() {
+  return process.env.NODE_ENV === 'production';
+}
+
 function createSupabaseBackend(): GreetingBackend | null {
   const admin = getSupabaseAdmin();
   if (!admin) return null;
@@ -69,6 +73,10 @@ export async function persistGreeting(
     });
     saveGreeting(input.slug, input.content);
     return 'supabase';
+  }
+
+  if (requiresDurablePersistence()) {
+    throw new Error('Public sharing is not configured. Set a valid Supabase server key before generating public links.');
   }
 
   saveGreeting(input.slug, input.content);

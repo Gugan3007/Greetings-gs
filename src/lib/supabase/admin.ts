@@ -8,7 +8,7 @@ export function getSupabaseAdmin(): SupabaseClient | null {
   if (adminClient !== undefined) return adminClient;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secretKey = process.env.SUPABASE_SECRET_KEY;
+  const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !secretKey) {
     adminClient = null;
@@ -27,5 +27,5 @@ export function getSupabaseAdmin(): SupabaseClient | null {
 }
 
 export function isSupabaseConfigured() {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY));
 }

@@ -88,8 +88,11 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Generation Error:', error);
+    const message = error instanceof Error && error.message.includes('Public sharing is not configured')
+      ? error.message
+      : 'Internal server error during generation';
     return NextResponse.json(
-      { error: 'Internal server error during generation' },
+      { error: message },
       { status: 500 }
     );
   }

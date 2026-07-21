@@ -16,4 +16,14 @@ describe('Supabase server configuration', () => {
 
     expect(getSupabaseAdmin()).toBeNull();
   });
+
+  it('accepts a legacy service-role env name for server-only access', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('SUPABASE_SECRET_KEY', '');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service-role-key');
+
+    const { isSupabaseConfigured } = await import('./admin');
+
+    expect(isSupabaseConfigured()).toBe(true);
+  });
 });

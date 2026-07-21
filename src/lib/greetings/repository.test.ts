@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { FormData } from '@/features/form/schema';
 import type { GreetingContent } from '@/lib/ai/schema';
@@ -33,6 +33,10 @@ const input = {
 };
 
 describe('greeting repository', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('rejects generation when configured persistence fails', async () => {
     const { persistGreeting } = await import('./repository');
     const backend = {
@@ -41,6 +45,14 @@ describe('greeting repository', () => {
     };
 
     await expect(persistGreeting(input, backend)).rejects.toThrow('database unavailable');
+    expect(getGreeting(input.slug)).toBeNull();
+  });
+
+  it('rejects production generation when durable persistence is not configured', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const { persistGreeting } = await import('./repository');
+
+    await expect(persistGreeting(input, null)).rejects.toThrow('Public sharing is not configured');
     expect(getGreeting(input.slug)).toBeNull();
   });
 
