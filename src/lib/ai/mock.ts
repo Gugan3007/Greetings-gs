@@ -238,6 +238,7 @@ export function createPersonalizedMock(data: FormData): GreetingContent {
       motifs,
       themeLabel: archetype === 'romance' ? 'A love story in little things' : archetype === 'family' ? 'The feeling of home' : `A ${data.occasion.replace('-', ' ')} made personal`,
     },
+    favoriteSong: data.favoriteSong || undefined,
     music: data.backgroundMusic || undefined,
     closingMessage: archetype === 'romance' ? 'Still choosing you. Always.' : archetype === 'family' ? 'With all the love a home can hold.' : 'Keep shining exactly as you are.',
     signatureLine,

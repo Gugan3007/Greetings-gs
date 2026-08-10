@@ -70,6 +70,17 @@ describe('createPersonalizedMock', () => {
     expect([...detailsByField.keys()]).toEqual(expect.arrayContaining(requiredFields));
   });
 
+  it('preserves favorite song and background music for the greeting player', () => {
+    const result = createPersonalizedMock({
+      ...richInput,
+      favoriteSong: 'Here Comes the Sun — The Beatles',
+      backgroundMusic: 'https://cdn.example.com/sun.mp3',
+    });
+
+    expect(result.favoriteSong).toBe('Here Comes the Sun — The Beatles');
+    expect(result.music).toBe('https://cdn.example.com/sun.mp3');
+  });
+
   it('does not repeat full sentences across the story and letter', () => {
     const result = createPersonalizedMock(richInput);
     const storySentences = new Set(

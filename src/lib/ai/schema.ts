@@ -77,7 +77,8 @@ export const greetingContentSchema = z.object({
   theme: greetingThemeSchema,
 
   // ── Media ────────────────────────────────
-  music: z.string().optional(),
+  favoriteSong: z.string().max(200).optional(),
+  music: z.string().max(2048).optional(),
 
   // ── Generated Metadata ──────────────────
   closingMessage: z.string().max(300),

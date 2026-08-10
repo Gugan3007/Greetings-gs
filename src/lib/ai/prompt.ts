@@ -103,6 +103,8 @@ Populate the strict JSON schema provided.
 - **playfulAside**: One small delightful line that could live in a side rail. For a romantic relationship it can nod to FLAMES, constellations, or shared chemistry; for family, friendship, or formal relationships choose an appropriate device instead.
 - **timeline**: Reformat the provided timeline (if any) to be clean and punchy.
 - **gallery**: (Leave the URLs as provided in the array, just add optional captions).
+- **favoriteSong**: Preserve the exact short favorite song or artist text supplied above. Leave it empty when none was supplied.
+- **music**: Preserve the exact background music URL supplied by the user. Leave it empty when none was supplied; never invent or search for a URL.
 - **closingMessage**: A sweet, final send-off before the footer.
 - **ogTitle / ogDescription**: SEO metadata for when this link is shared on iMessage/WhatsApp.
 - **coverageMap**: A JSON object listing every input field key and which output field used it. Include every key exactly once. Required keys: ${FORM_FIELD_KEYS.join(', ')}. If a field is empty, still name the output field that would carry that kind of detail, such as "story", "theme", "gallery", "letter", or "dedication".

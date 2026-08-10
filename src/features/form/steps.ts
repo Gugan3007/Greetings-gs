@@ -94,7 +94,7 @@ export const FORM_STEPS: FormStep[] = [
         { value: 'cooking', label: 'Cooking' },
         { value: 'playing with pets', label: 'Pets' },
       ] },
-      { key: 'favoriteSong', label: 'Favorite song or artist', placeholder: 'e.g. "Here Comes the Sun" - The Beatles', type: 'text' },
+      { key: 'favoriteSong', label: 'Favorite song or artist', placeholder: 'e.g. "Here Comes the Sun" — The Beatles', type: 'text', helperText: 'Enter a title, or paste a Spotify or YouTube link' },
       { key: 'favoriteFood', label: 'Favorite food', placeholder: 'Custom food, e.g. porotta from that one shop', type: 'choice-text', options: [
         { value: 'porotta', label: 'Porotta' },
         { value: 'biryani', label: 'Biryani' },
@@ -197,6 +197,7 @@ export const FORM_STEPS: FormStep[] = [
     accentColor: 'var(--accent-purple)',
     fields: [
       { key: 'photos', label: 'Photos', type: 'photos', helperText: 'Upload up to 20 photos. Square or portrait work best.' },
+      { key: 'backgroundMusic', label: 'Background music link', placeholder: 'https://example.com/song.mp3, Spotify, or YouTube', type: 'text', helperText: 'Optional. Direct audio links can play in the greeting; Spotify and YouTube links open an embedded player.' },
       { key: 'mediaConsent', label: 'I confirm I have the rights to share these photos, videos, and music', type: 'checkbox', required: true },
     ],
   },
