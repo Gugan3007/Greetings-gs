@@ -1,48 +1,61 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import type { GreetingContent } from '@/lib/ai/schema';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { buildBackdropMotifs } from './personalized-backdrop';
+import { buildPersonalizedScene } from './personalized-scene';
 
-const archetypeSymbols = {
-  romance: ['♡', '✦', 'FLAMES'],
-  family: ['⌂', '♡', 'HOME'],
-  friendship: ['✦', '∞', 'US'],
-  celebration: ['✦', '·', 'JOY'],
-  comfort: ['❀', '♡', 'BREATHE'],
-  achievement: ['↗', '✦', 'BRAVO'],
-};
-
-export function PersonalizedBackdrop({ data }: { data: GreetingContent }) {
+export function PersonalizedBackdrop({
+  data,
+  isMusicPlaying = false,
+}: {
+  data: GreetingContent;
+  isMusicPlaying?: boolean;
+}) {
   const reducedMotion = useReducedMotion();
-  const archetype = data.theme.archetype || 'celebration';
-  const motifs = [...buildBackdropMotifs(data), ...archetypeSymbols[archetype]].slice(0, 6);
-  const motifText = motifs.join(' ').toLowerCase();
-  const glyphs = [
-    motifText.includes('paw') || motifText.includes('dog') || motifText.includes('cat') ? '🐾' : null,
-    motifText.includes('flower') || motifText.includes('garden') ? '❀' : null,
-    motifText.includes('layer') || motifText.includes('porotta') ? '◌' : null,
-    motifText.includes('biryani') ? '✦' : null,
-    archetype === 'romance' ? '♡' : null,
-    archetype === 'family' ? '⌂' : null,
-    archetype === 'achievement' ? '↗' : null,
-  ].filter(Boolean) as string[];
-  const glyphPositions = ['left-[9%] top-[18%]', 'right-[11%] top-[31%]', 'left-[14%] top-[68%]', 'right-[16%] top-[78%]'];
+  const scene = useMemo(() => buildPersonalizedScene(data), [data]);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <div
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      data-music-playing={isMusicPlaying ? 'true' : 'false'}
+      aria-hidden="true"
+    >
       <div className="greeting-vignette absolute inset-0" />
-      <div className="absolute inset-0">
-        {glyphPositions.map((position, index) => (
+      <motion.div
+        className="absolute left-1/2 top-1/2 h-[52rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+        style={{
+          background: `radial-gradient(circle, ${scene.palette[0]}1f 0%, ${scene.palette[1]}0d 36%, transparent 68%)`,
+        }}
+        animate={reducedMotion || !isMusicPlaying ? undefined : { scale: [0.92, 1.08, 0.92], opacity: [0.5, 0.85, 0.5] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <div className="absolute inset-0 opacity-90">
+        {scene.motifs.map((item, index) => (
           <motion.span
-            key={`${position}-${index}`}
-            data-personalized-glyph={glyphs[index % Math.max(glyphs.length, 1)] || '✦'}
-            className={`absolute ${position} text-5xl text-[color:var(--greeting-accent)] opacity-[0.055] sm:text-7xl`}
-            animate={reducedMotion ? undefined : { y: [0, index % 2 === 0 ? -12 : 12, 0], rotate: [0, index % 2 === 0 ? -5 : 5, 0] }}
-            transition={{ duration: 10 + index * 2, repeat: Infinity, ease: 'easeInOut' }}
+            key={item.id}
+            data-personalized-glyph={item.glyph}
+            data-personalized-family={item.family}
+            className={`absolute ${item.className} select-none text-4xl font-light opacity-[0.09] sm:text-6xl`}
+            style={{
+              color: scene.palette[index % scene.palette.length],
+              textShadow: `0 0 34px ${scene.palette[index % scene.palette.length]}55`,
+            }}
+            animate={reducedMotion ? undefined : {
+              y: [0, item.drift * (isMusicPlaying ? 1.35 : 1), 0],
+              x: [0, index % 2 === 0 ? 8 : -8, 0],
+              rotate: [0, index % 2 === 0 ? -7 : 7, 0],
+              scale: isMusicPlaying ? [1, 1.12, 1] : [1, 1.04, 1],
+            }}
+            transition={{
+              duration: isMusicPlaying ? Math.max(5.5, item.duration * 0.7) : item.duration,
+              delay: item.delay,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
           >
-            {glyphs[index % Math.max(glyphs.length, 1)] || '✦'}
+            {item.glyph}
           </motion.span>
         ))}
       </div>
