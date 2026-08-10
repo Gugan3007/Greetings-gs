@@ -15,6 +15,7 @@ import {
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { buildSongSearchLinks, formatMusicTime, resolveMusicSource } from './music-source';
+import { applyMusicVolume, INITIAL_MUSIC_VOLUME } from './music-volume';
 
 type GreetingMusicPlayerProps = {
   music?: string;
@@ -72,7 +73,7 @@ export function GreetingMusicPlayer({ music, favoriteSong, onPlayingChange }: Gr
   const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(0.75);
+  const [volume, setVolume] = useState(INITIAL_MUSIC_VOLUME);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -82,6 +83,10 @@ export function GreetingMusicPlayer({ music, favoriteSong, onPlayingChange }: Gr
       onPlayingChange?.(false);
     };
   }, [source, onPlayingChange]);
+
+  useEffect(() => {
+    if (audioRef.current) applyMusicVolume(audioRef.current, volume);
+  }, [source.kind, volume]);
 
   if (source.kind === 'none') return null;
 
@@ -114,7 +119,7 @@ export function GreetingMusicPlayer({ music, favoriteSong, onPlayingChange }: Gr
   const changeVolume = (nextVolume: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = nextVolume;
+    applyMusicVolume(audio, nextVolume);
     audio.muted = false;
     setVolume(nextVolume);
     setIsMuted(false);
