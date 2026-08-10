@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildSongSearchLinks, resolveMusicSource } from './music-source';
+import { buildSongSearchLinks, formatMusicTime, resolveMusicSource } from './music-source';
 
 describe('resolveMusicSource', () => {
   it('classifies an HTTPS audio file and preserves its title', () => {
@@ -65,5 +65,17 @@ describe('buildSongSearchLinks', () => {
       spotify: 'https://open.spotify.com/search/A%20%26%20B',
       youtube: 'https://www.youtube.com/results?search_query=A%20%26%20B',
     });
+  });
+});
+
+describe('formatMusicTime', () => {
+  it.each([
+    [0, '0:00'],
+    [9.8, '0:09'],
+    [65, '1:05'],
+    [Number.NaN, '0:00'],
+    [Number.POSITIVE_INFINITY, '0:00'],
+  ])('formats %s seconds as %s', (seconds, formatted) => {
+    expect(formatMusicTime(seconds)).toBe(formatted);
   });
 });

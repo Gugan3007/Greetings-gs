@@ -14,6 +14,7 @@ import { GreetingSignature } from '@/features/greeting/GreetingSignature';
 import { GreetingDedication } from '@/features/greeting/GreetingDedication';
 import { OccasionSignatureMoment } from '@/features/greeting/OccasionSignatureMoment';
 import { PersonalizedBackdrop } from '@/features/greeting/PersonalizedBackdrop';
+import { GreetingMusicPlayer } from '@/features/greeting/GreetingMusicPlayer';
 import { ShareModal } from '@/features/greeting/ShareModal';
 import { Heart, Share2 } from 'lucide-react';
 
@@ -69,6 +70,7 @@ export default function GreetingPage() {
     return content ? dedupeGreetingContent(content) : null;
   }, [availableResult]);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const isOwner = Boolean(
     sessionResult?.ownerToken &&
     sessionStorage.getItem(`gs-greeting-owner:${slug}`) === sessionResult.ownerToken
@@ -100,7 +102,7 @@ export default function GreetingPage() {
       className={`greeting-page relative min-h-[100svh] overflow-x-hidden text-foreground selection:bg-accent-purple/30 selection:text-white theme-${data.theme.mode}`}
       style={{ '--greeting-accent': `var(${accentVar})` } as CSSProperties}
     >
-      <PersonalizedBackdrop data={data} />
+      <PersonalizedBackdrop data={data} isMusicPlaying={isMusicPlaying} />
 
       {isOwner ? (
         <div className="fixed inset-x-0 top-5 z-40 flex justify-center px-4">
@@ -111,6 +113,12 @@ export default function GreetingPage() {
           </div>
         </div>
       ) : null}
+
+      <GreetingMusicPlayer
+        music={data.music}
+        favoriteSong={data.favoriteSong}
+        onPlayingChange={setIsMusicPlaying}
+      />
 
       <main className="relative z-10">
         <GreetingHero data={data} />
