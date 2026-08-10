@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server';
 import { generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
 import { nanoid } from 'nanoid';
+import { networkInterfaces } from 'node:os';
 
 import { formSchema } from '@/features/form/schema';
 import { greetingContentSchema, type GreetingContent } from '@/lib/ai/schema';
 import { buildSystemPrompt } from '@/lib/ai/prompt';
-import { supabase } from '@/lib/supabase/client';
+import { createPersonalizedMock } from '@/lib/ai/mock';
+import { dedupeGreetingContent } from '@/lib/ai/dedupe';
+import { persistGreeting } from '@/lib/greetings/repository';
+import { buildShareUrl } from '@/lib/greetings/share-url';
 
 export const maxDuration = 60; // 60 seconds max duration for AI generation
 
@@ -25,6 +29,16 @@ export async function POST(req: Request) {
 
     const formData = parsed.data;
     const slug = nanoid(10); // Generate unique URL slug
+    const ownerToken = nanoid(32);
+    const localAddress = Object.values(networkInterfaces())
+      .flat()
+      .find((address) => address?.family === 'IPv4' && !address.internal)?.address;
+    const share = buildShareUrl({
+      requestUrl: req.url,
+      slug,
+      configuredSite: process.env.NEXT_PUBLIC_SITE_URL,
+      lanAddress: localAddress,
+    });
 
     // TODO: Handle Image Uploads to Supabase Storage here
     // For now, we pass the data URIs through (or ignore them for the AI prompt)
@@ -37,28 +51,7 @@ export async function POST(req: Request) {
       // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 3000));
       
-      aiContent = {
-        recipientName: formData.recipientName,
-        heroHeadline: `To ${formData.recipientName}, the one who makes everything brighter.`,
-        greetingMessage: `This is a special celebration just for you.`,
-        story: `You are incredibly special. When I think of you, I think of ${formData.favoriteColor || 'bright'} colors and ${formData.favoriteFood || 'sweet'} moments. We've shared so much, especially that time ${formData.bestMoment || 'we laughed until we cried'}.`,
-        letter: formData.personalLetter || 'I love you so much!',
-        quotes: ['"A true friend leaves paw prints on your heart."'],
-        timeline: formData.timeline?.slice(0, 3).map(m => ({ date: m.date, caption: m.caption })) || [],
-        gallery: formData.photos?.slice(0, 5).map(p => ({ url: p, caption: '' })) || [],
-        memoryHighlights: [
-          { title: 'Favorite Movie', description: formData.favoriteMovie || 'Unknown', emoji: '🎥' },
-          { title: 'Superpower', description: formData.whatMakesThemSpecial || 'Being awesome', emoji: '✨' },
-        ],
-        theme: {
-          mode: formData.themeMode === 'light' ? 'light' : 'dark',
-          accent: 'purple',
-          density: formData.density === 'minimal' ? 'minimal' : 'luxury',
-        },
-        closingMessage: 'With all my heart.',
-        ogTitle: `A special greeting for ${formData.recipientName}`,
-        ogDescription: 'Someone made something beautiful just for you.',
-      };
+      aiContent = createPersonalizedMock(formData);
     } else {
       // 2. Generate content using Vercel AI SDK and Google Gemini 1.5 Pro
       const result = await generateObject({
@@ -72,31 +65,34 @@ export async function POST(req: Request) {
       aiContent = result.object;
     }
 
-    // 3. Save to Supabase
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      const { error } = await supabase.from('greetings').insert({
-        slug,
-        form_data: formData,
-        ai_content: aiContent,
-        status: 'published',
-      });
+    aiContent = dedupeGreetingContent(aiContent);
+    const persistence = await persistGreeting({
+      slug,
+      formData,
+      content: aiContent,
+      ownerToken,
+    });
 
-      if (error) {
-        console.error('Supabase insert error:', error);
-        // We'll still return success so the user can see it, but log the error
-      }
-    } else {
-      console.warn('⚠️ No NEXT_PUBLIC_SUPABASE_URL found. Skipping database insert.');
-      // In a real app we'd throw, but for local dev without DB we'll just return the mock slug
+    if (persistence === 'memory') {
+      console.warn('⚠️ Supabase is not configured. Greeting is available only while this server is running.');
     }
 
     // 4. Return the slug for redirect
-    return NextResponse.json({ success: true, slug, mockContent: aiContent });
+    return NextResponse.json({
+      success: true,
+      slug,
+      ownerToken,
+      shareUrl: share.url,
+      shareScope: share.scope,
+    });
 
   } catch (error) {
     console.error('Generation Error:', error);
+    const message = error instanceof Error && error.message.includes('Public sharing is not configured')
+      ? error.message
+      : 'Internal server error during generation';
     return NextResponse.json(
-      { error: 'Internal server error during generation' },
+      { error: message },
       { status: 500 }
     );
   }

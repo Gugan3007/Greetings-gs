@@ -14,7 +14,7 @@ export function GreetingHighlights({ data }: GreetingHighlightsProps) {
   if (highlights.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-24 sm:py-32">
+    <section className="greeting-section py-20 sm:py-32">
       <Reveal direction="up">
         <h2 
           className="mb-16 text-center text-4xl font-bold sm:text-5xl"
@@ -24,7 +24,7 @@ export function GreetingHighlights({ data }: GreetingHighlightsProps) {
         </h2>
       </Reveal>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2">
         {highlights.map((highlight, idx) => {
           // Make some cards span 2 columns if we have an odd number, for a bento feel
           const isLarge = highlights.length % 2 !== 0 && idx === 0;
@@ -35,10 +35,10 @@ export function GreetingHighlights({ data }: GreetingHighlightsProps) {
               scale={0.9}
               direction="up"
               delay={idx * 0.1}
-              className={isLarge ? 'sm:col-span-2 lg:col-span-2' : ''}
+              className={isLarge ? 'sm:col-span-2' : ''}
             >
               <GlassCard 
-                className="flex h-full flex-col justify-center p-8 sm:p-10"
+                className="flex h-full min-h-56 flex-col items-center justify-center p-8 text-center sm:p-10"
                 hover={true}
               >
                 {highlight.emoji && (

@@ -1,0 +1,99 @@
+import { describe, expect, it } from 'vitest';
+
+import { defaultFormValues, type FormData } from '@/features/form/schema';
+import { createPersonalizedMock } from './mock';
+import { FORM_FIELD_KEYS } from './form-fields';
+
+const richInput: FormData = {
+  ...defaultFormValues,
+  recipientName: 'Mitra',
+  recipientGender: 'she/her',
+  relationship: 'my girlfriend',
+  occasion: 'just-because',
+  personalityDescription: 'She is warm and playful with tiny details.',
+  favoriteColor: 'blue',
+  favoriteFood: 'porotta',
+  favoriteAnimal: 'dogs',
+  favoritePlace: 'Thindal temple',
+  whatMakesThemSpecial: 'She makes ordinary evenings feel safe, funny, and unforgettable.',
+  personalLetter: 'I am always there with you, whenever and wherever you go.',
+  bestMoment: 'Our first date at Thindal temple.',
+  funniestMemory: 'Laughing over food and teasing each other about the last bite.',
+  timeline: [{ date: '2026-02-28', caption: 'We first met at Thindal Murugan Temple' }],
+  tone: 'cute',
+  senderName: 'Gugan',
+  mediaConsent: true,
+};
+
+describe('createPersonalizedMock', () => {
+  it('covers every form field in the generated coverage map', () => {
+    const result = createPersonalizedMock(richInput);
+
+    expect(Object.keys(result.coverageMap).sort()).toEqual([...FORM_FIELD_KEYS].sort());
+  });
+
+  it('transforms typed sender copy instead of pasting it verbatim', () => {
+    const result = createPersonalizedMock(richInput);
+    const visibleCopy = [
+      result.heroHeadline,
+      result.greetingMessage,
+      result.story,
+      result.letter,
+      result.closingMessage,
+      result.signatureLine,
+      result.playfulAside,
+      ...result.quotes,
+    ].join('\n');
+
+    expect(visibleCopy).not.toContain(richInput.personalLetter);
+    expect(visibleCopy).not.toContain(richInput.whatMakesThemSpecial);
+    expect(visibleCopy).toMatch(/porotta/i);
+    expect(visibleCopy).toMatch(/paw|dog/i);
+    expect(visibleCopy).toMatch(/Thindal/i);
+    expect(visibleCopy).toMatch(/beside|choose|with you|near/i);
+  });
+
+  it('turns every non-empty input into a visible authored detail line', () => {
+    const result = createPersonalizedMock(richInput);
+    const detailsByField = new Map(result.personalizedDetails.map((detail) => [detail.field, detail.line]));
+
+    expect(detailsByField.get('favoriteColor')).toMatch(/blue/i);
+    expect(detailsByField.get('favoriteColor')).toMatch(/sky|ocean|calm|heart|blush/i);
+    expect(detailsByField.get('favoriteFood')).toMatch(/porotta/i);
+    expect(detailsByField.get('favoriteAnimal')).toMatch(/paw|dog/i);
+    expect(detailsByField.get('personalLetter')).not.toContain(richInput.personalLetter);
+
+    const requiredFields = Object.entries(richInput)
+      .filter(([, value]) => value !== '' && value !== undefined && value !== false && (!Array.isArray(value) || value.length > 0))
+      .map(([key]) => key);
+
+    expect([...detailsByField.keys()]).toEqual(expect.arrayContaining(requiredFields));
+  });
+
+  it('preserves favorite song and background music for the greeting player', () => {
+    const result = createPersonalizedMock({
+      ...richInput,
+      favoriteSong: 'Here Comes the Sun — The Beatles',
+      backgroundMusic: 'https://cdn.example.com/sun.mp3',
+    });
+
+    expect(result.favoriteSong).toBe('Here Comes the Sun — The Beatles');
+    expect(result.music).toBe('https://cdn.example.com/sun.mp3');
+  });
+
+  it('does not repeat full sentences across the story and letter', () => {
+    const result = createPersonalizedMock(richInput);
+    const storySentences = new Set(
+      result.story
+        .split(/(?<=[.!?])\s+/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean)
+    );
+    const repeated = result.letter
+      .split(/(?<=[.!?])\s+/)
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => storySentences.has(sentence));
+
+    expect(repeated).toEqual([]);
+  });
+});

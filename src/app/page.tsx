@@ -107,7 +107,7 @@ export default function LandingPage() {
                 className="animated-border rounded-[var(--radius-xl)] bg-bg-secondary px-8 py-4"
               >
                 <Link
-                  href="/create"
+                  href="/create?new=1"
                   className="flex items-center gap-3 text-lg font-semibold text-foreground no-underline"
                 >
                   <Wand2 className="h-5 w-5 text-accent-purple" />
@@ -261,7 +261,7 @@ export default function LandingPage() {
             </p>
             <MagneticButton className="rounded-[var(--radius-xl)] bg-gradient-to-r from-accent-purple to-accent-blue px-10 py-5 shadow-lg shadow-accent-purple/25">
               <Link
-                href="/create"
+                href="/create?new=1"
                 className="flex items-center gap-3 text-lg font-semibold text-white no-underline"
               >
                 Start Creating Now

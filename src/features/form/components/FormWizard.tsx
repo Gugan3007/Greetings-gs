@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Send, Loader2, CircleAlert } from 'lucide-react';
 import { useState } from 'react';
 
 import { useFormStore } from '../store';
@@ -18,32 +18,65 @@ import { duration, ease } from '@/lib/motion';
  * One question group per screen with animated transitions.
  */
 export function FormWizard() {
-  const store = useFormStore();
+  const [startFresh] = useState(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('new') === '1'
+  );
+  const store = useFormStore({ startFresh });
   const prefersReduced = useReducedMotion();
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const currentStepConfig = FORM_STEPS[store.currentStep];
+
+  const getStepErrors = (stepIndex: number) => {
+    const result = store.validate();
+    if (result.success) return {};
+
+    const stepFields = new Set(FORM_STEPS[stepIndex].fields.map((field) => field.key));
+    return Object.fromEntries(
+      result.error.issues
+        .filter((issue) => stepFields.has(issue.path[0] as keyof typeof store.formData))
+        .map((issue) => [String(issue.path[0]), issue.message])
+    );
+  };
 
   const handleNext = () => {
     setDirection(1);
     if (store.isLastStep) {
       handleSubmit();
     } else {
+      const stepErrors = getStepErrors(store.currentStep);
+      if (Object.keys(stepErrors).length > 0) {
+        setValidationErrors(stepErrors);
+        return;
+      }
+      setValidationErrors({});
       store.nextStep();
     }
   };
 
   const handlePrev = () => {
     setDirection(-1);
+    setValidationErrors({});
     store.prevStep();
   };
 
   const handleSubmit = async () => {
     const result = store.validate();
     if (!result.success) {
-      // TODO: Show validation errors
-      console.error('Validation failed:', result.error.flatten());
+      const firstInvalidKey = result.error.issues[0]?.path[0];
+      const firstInvalidStep = FORM_STEPS.findIndex((step) =>
+        step.fields.some((field) => field.key === firstInvalidKey)
+      );
+
+      if (firstInvalidStep >= 0) {
+        setDirection(firstInvalidStep < store.currentStep ? -1 : 1);
+        setValidationErrors(getStepErrors(firstInvalidStep));
+        store.goToStep(firstInvalidStep);
+      } else {
+        setValidationErrors({ form: 'Please review the form and complete the required fields.' });
+      }
       return;
     }
 
@@ -54,6 +87,7 @@ export function FormWizard() {
     // For now, store in sessionStorage and redirect
     try {
       sessionStorage.setItem('gs-greeting-submission', JSON.stringify(data));
+      store.resetForm();
       window.location.href = '/processing';
     } catch {
       setIsSubmitting(false);
@@ -90,7 +124,7 @@ export function FormWizard() {
     <div className="flex min-h-screen flex-col">
       {/* ─── Top Bar ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-glass-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+        <div className="mx-auto grid max-w-3xl grid-cols-3 items-center px-6 py-4">
           <button
             onClick={() => window.history.back()}
             className="flex items-center gap-2 text-sm text-fg-secondary transition-colors hover:text-foreground"
@@ -100,18 +134,18 @@ export function FormWizard() {
             <span className="hidden sm:inline">Back</span>
           </button>
 
-          <span className="text-sm font-medium text-fg-secondary">
+          <span className="text-center text-sm font-medium text-fg-secondary">
             Step {store.currentStep + 1} of {store.totalSteps}
           </span>
 
-          <div className="w-16" /> {/* Spacer for centering */}
+          <div />
         </div>
         <ProgressBar progress={store.progress} accentColor={currentStepConfig.accentColor} />
       </header>
 
       {/* ─── Step Content ────────────────────────────────────────── */}
-      <main className="flex flex-1 items-start justify-center px-6 pt-12 pb-32 md:pt-20 md:pb-40">
-        <div className="w-full max-w-2xl">
+      <main className="flex w-full flex-1 items-start justify-center px-4 pt-8 pb-32 sm:px-6 md:pt-16 md:pb-40">
+        <div className="form-wizard-frame mx-auto rounded-[2rem] border border-glass-border bg-white/[0.018]">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={store.currentStep}
@@ -126,9 +160,9 @@ export function FormWizard() {
               }}
             >
               {/* Step header */}
-              <div className="mb-10">
+              <div className="mb-10 text-center">
                 <div
-                  className="mb-3 flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)]"
+                  className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)]"
                   style={{ background: `${currentStepConfig.accentColor}20` }}
                 >
                   <currentStepConfig.icon
@@ -153,6 +187,27 @@ export function FormWizard() {
                 formData={store.formData}
                 updateField={store.updateField}
               />
+
+              {Object.keys(validationErrors).length > 0 && (
+                <motion.div
+                  role="alert"
+                  aria-live="assertive"
+                  className="mt-8 rounded-[var(--radius-md)] border border-accent-rose/35 bg-accent-rose/10 p-4 text-center"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="mb-2 flex items-center justify-center gap-2 font-semibold text-accent-rose">
+                    <CircleAlert className="h-4 w-4" />
+                    Please complete this step
+                  </div>
+                  <ul className="space-y-1 text-sm text-fg-secondary">
+                    {Object.entries(validationErrors).map(([fieldKey, message]) => {
+                      const field = currentStepConfig.fields.find((item) => item.key === fieldKey);
+                      return <li key={fieldKey}>{field?.label || 'Form'}: {message}</li>;
+                    })}
+                  </ul>
+                </motion.div>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -160,7 +215,7 @@ export function FormWizard() {
 
       {/* ─── Navigation Footer ───────────────────────────────────── */}
       <footer className="sticky bottom-0 border-t border-glass-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+        <div className="mx-auto grid max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-6 py-4">
           <RippleButton
             variant="ghost"
             onClick={handlePrev}
@@ -171,7 +226,7 @@ export function FormWizard() {
             <span className="hidden sm:inline">Back</span>
           </RippleButton>
 
-          {store.isDirty && (
+          <div className="text-center">{store.isDirty && (
             <motion.span
               className="text-xs text-fg-muted"
               initial={{ opacity: 0 }}
@@ -180,7 +235,7 @@ export function FormWizard() {
             >
               Draft saving...
             </motion.span>
-          )}
+          )}</div>
 
           {store.isLastStep ? (
             <MagneticButton
@@ -199,7 +254,7 @@ export function FormWizard() {
               )}
             </MagneticButton>
           ) : (
-            <RippleButton variant="primary" onClick={handleNext} aria-label="Next step">
+            <RippleButton className="justify-self-end" variant="primary" onClick={handleNext} aria-label="Next step">
               <span>Continue</span>
               <ArrowRight className="h-4 w-4" />
             </RippleButton>

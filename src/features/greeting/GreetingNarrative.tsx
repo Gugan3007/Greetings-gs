@@ -14,8 +14,8 @@ export function GreetingNarrative({ data }: GreetingNarrativeProps) {
   const quotes = data.quotes || [];
 
   return (
-    <section className="relative mx-auto max-w-3xl px-6 py-24 sm:py-32">
-      <div className="space-y-16 sm:space-y-24">
+    <section className="greeting-section relative py-20 text-center sm:py-32">
+      <div className="mx-auto max-w-3xl space-y-14 sm:space-y-20">
         {paragraphs.map((paragraph, idx) => (
           <div key={idx}>
             <Reveal
@@ -23,14 +23,14 @@ export function GreetingNarrative({ data }: GreetingNarrativeProps) {
               duration={0.8}
               margin="-30%"
             >
-              <p className="text-xl font-light leading-relaxed text-fg-secondary sm:text-2xl sm:leading-loose">
+              <p className="text-balance text-xl font-light leading-relaxed text-fg-secondary sm:text-2xl sm:leading-loose">
                 {paragraph}
               </p>
             </Reveal>
 
             {/* Interleave a pull quote after certain paragraphs if available */}
             {quotes[idx] && (
-              <div className="my-24 py-12">
+              <div className="my-16 py-8 sm:my-24 sm:py-12">
                 <Reveal
                   direction="up"
                   duration={0.8}
@@ -38,9 +38,8 @@ export function GreetingNarrative({ data }: GreetingNarrativeProps) {
                   margin="-50%"
                 >
                   <blockquote 
-                    className="border-l-4 pl-8 italic text-3xl font-medium sm:text-4xl md:text-5xl leading-tight text-foreground"
+                    className="mx-auto max-w-4xl text-balance text-3xl font-medium italic leading-tight text-foreground sm:text-4xl md:text-5xl"
                     style={{ 
-                      borderColor: `var(--accent-${data.theme.accent || 'purple'})`,
                       fontFamily: 'var(--font-display)' 
                     }}
                   >

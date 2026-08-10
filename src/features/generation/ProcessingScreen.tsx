@@ -8,7 +8,6 @@ import confetti from 'canvas-confetti';
 import { AuroraBackground } from '@/components/backgrounds/AuroraBackground';
 import { FloatingOrbs } from '@/components/backgrounds/FloatingOrbs';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { duration, ease } from '@/lib/motion';
 
 // ─── Stage Configuration ─────────────────────────────────────────────────────
 
@@ -79,6 +78,7 @@ export function ProcessingScreen() {
   const prefersReduced = useReducedMotion();
   const microCopyIndex = useRef(0);
   const hasStarted = useRef(false);
+  const completedSlug = useRef<string | null>(null);
 
   // Simulate stage progression while waiting for API
   useEffect(() => {
@@ -128,14 +128,41 @@ export function ProcessingScreen() {
 
         if (!res.ok) throw new Error(data.error || 'Generation failed');
 
+        completedSlug.current = data.slug;
+
+        // Uploaded images can be several megabytes. The full greeting already
+        // lives on the server, so the browser only needs lightweight ownership
+        // and sharing metadata for the redirect.
+        sessionStorage.removeItem('gs-greeting-submission');
+        Object.keys(sessionStorage)
+          .filter((key) => key === 'gs-greeting-result' || key.startsWith('gs-greeting-result:'))
+          .forEach((key) => sessionStorage.removeItem(key));
+
+        const clientResult = {
+          success: true,
+          slug: data.slug,
+          ownerToken: data.ownerToken,
+          shareUrl: data.shareUrl,
+          shareScope: data.shareScope,
+        };
+
+        try {
+          const serializedResult = JSON.stringify(clientResult);
+          sessionStorage.setItem('gs-greeting-result', serializedResult);
+          sessionStorage.setItem(`gs-greeting-result:${data.slug}`, serializedResult);
+          if (data.ownerToken) {
+            sessionStorage.setItem(`gs-greeting-owner:${data.slug}`, data.ownerToken);
+          }
+        } catch {
+          // Storage can be disabled in private/restricted browser contexts.
+          // The server copy is sufficient to display the greeting.
+        }
+
         // Generation successful!
         clearInterval(progressInterval);
         setProgress(100);
         setCurrentStage(STAGES.length - 1);
         setIsComplete(true);
-        
-        // Save the slug/mock data for the redirect
-        sessionStorage.setItem('gs-greeting-result', JSON.stringify(data));
 
       } catch (err) {
         console.error(err);
@@ -160,7 +187,9 @@ export function ProcessingScreen() {
 
   // Confetti on completion
   useEffect(() => {
-    if (isComplete && !prefersReduced) {
+    if (!isComplete) return;
+
+    if (!prefersReduced) {
       const fire = () => {
         confetti({
           particleCount: 100,
@@ -171,20 +200,14 @@ export function ProcessingScreen() {
       };
       fire();
       setTimeout(fire, 300);
-
-      // Redirect after celebration
-      setTimeout(() => {
-        const resultRaw = sessionStorage.getItem('gs-greeting-result');
-        if (resultRaw) {
-          const result = JSON.parse(resultRaw);
-          // If we have a DB, we redirect to /g/[slug]. 
-          // Since we might be running without a DB in mock mode, we pass the mock slug
-          window.location.href = `/g/${result.slug}`;
-        } else {
-          window.location.href = '/';
-        }
-      }, 2500);
     }
+
+    const redirectTimer = setTimeout(() => {
+      const slug = completedSlug.current;
+      window.location.href = slug ? `/g/${slug}` : '/';
+    }, prefersReduced ? 300 : 2500);
+
+    return () => clearTimeout(redirectTimer);
   }, [isComplete, prefersReduced]);
 
   if (error) {

@@ -7,7 +7,7 @@ export interface FormField {
   key: keyof FormData;
   label: string;
   placeholder?: string;
-  type: 'text' | 'textarea' | 'select' | 'date' | 'number' | 'file' | 'toggle' | 'option-cards' | 'timeline' | 'photos' | 'checkbox';
+  type: 'text' | 'textarea' | 'select' | 'date' | 'number' | 'file' | 'toggle' | 'option-cards' | 'choice-text' | 'timeline' | 'photos' | 'checkbox';
   options?: { value: string; label: string; emoji?: string; description?: string }[];
   required?: boolean;
   maxLength?: number;
@@ -78,12 +78,72 @@ export const FORM_STEPS: FormStep[] = [
     accentColor: 'var(--accent-rose)',
     fields: [
       { key: 'personalityDescription', label: 'Describe their personality', placeholder: 'e.g. Bubbly, always laughing, incredibly caring, loves adventure...', type: 'textarea', maxLength: 500, helperText: 'A few sentences about what makes them who they are' },
-      { key: 'favoriteColor', label: 'Favorite color', placeholder: 'e.g. Ocean blue', type: 'text' },
-      { key: 'favoriteHobby', label: 'Favorite hobby', placeholder: 'e.g. Painting, hiking, cooking', type: 'text' },
-      { key: 'favoriteSong', label: 'Favorite song or artist', placeholder: 'e.g. "Here Comes the Sun" - The Beatles', type: 'text' },
-      { key: 'favoriteFood', label: 'Favorite food', placeholder: 'e.g. Grandma\'s apple pie', type: 'text' },
+      { key: 'favoriteColor', label: 'Favorite color', placeholder: 'Custom color, e.g. ocean blue', type: 'choice-text', options: [
+        { value: 'blue', label: 'Blue' },
+        { value: 'pink', label: 'Pink' },
+        { value: 'purple', label: 'Purple' },
+        { value: 'black', label: 'Black' },
+        { value: 'gold', label: 'Gold' },
+        { value: 'green', label: 'Green' },
+      ] },
+      { key: 'favoriteHobby', label: 'Favorite hobby', placeholder: 'Custom hobby, e.g. sketching at night', type: 'choice-text', options: [
+        { value: 'music', label: 'Music' },
+        { value: 'dance', label: 'Dance' },
+        { value: 'painting', label: 'Painting' },
+        { value: 'travel', label: 'Travel' },
+        { value: 'cooking', label: 'Cooking' },
+        { value: 'playing with pets', label: 'Pets' },
+      ] },
+      { key: 'favoriteSong', label: 'Favorite song or artist', placeholder: 'e.g. "Here Comes the Sun" — The Beatles', type: 'text', helperText: 'Enter a title, or paste a Spotify or YouTube link' },
+      { key: 'favoriteFood', label: 'Favorite food', placeholder: 'Custom food, e.g. porotta from that one shop', type: 'choice-text', options: [
+        { value: 'porotta', label: 'Porotta' },
+        { value: 'biryani', label: 'Biryani' },
+        { value: 'chocolate', label: 'Chocolate' },
+        { value: 'ice cream', label: 'Ice cream' },
+        { value: 'pizza', label: 'Pizza' },
+        { value: 'coffee', label: 'Coffee' },
+      ] },
       { key: 'favoriteMovie', label: 'Favorite movie', placeholder: 'e.g. The Princess Bride', type: 'text' },
-      { key: 'favoritePlace', label: 'Favorite place', placeholder: 'e.g. That café on 5th street', type: 'text' },
+      { key: 'favoritePlace', label: 'Favorite place', placeholder: 'Custom place, e.g. Thindal temple', type: 'choice-text', options: [
+        { value: 'temple', label: 'Temple' },
+        { value: 'beach', label: 'Beach' },
+        { value: 'home', label: 'Home' },
+        { value: 'college', label: 'College' },
+        { value: 'cafe', label: 'Cafe' },
+        { value: 'park', label: 'Park' },
+      ] },
+      { key: 'favoriteAnimal', label: 'Favorite animal or pet', placeholder: 'Custom pet, e.g. dogs, cats, Max', type: 'choice-text', options: [
+        { value: 'dogs', label: 'Dogs' },
+        { value: 'cats', label: 'Cats' },
+        { value: 'puppies', label: 'Puppies' },
+        { value: 'birds', label: 'Birds' },
+        { value: 'rabbits', label: 'Rabbits' },
+        { value: 'horses', label: 'Horses' },
+      ] },
+      { key: 'favoriteFlower', label: 'Favorite flower', placeholder: 'Custom flower, e.g. jasmine', type: 'choice-text', options: [
+        { value: 'rose', label: 'Rose' },
+        { value: 'jasmine', label: 'Jasmine' },
+        { value: 'sunflower', label: 'Sunflower' },
+        { value: 'lily', label: 'Lily' },
+        { value: 'lotus', label: 'Lotus' },
+        { value: 'tulip', label: 'Tulip' },
+      ] },
+      { key: 'travelDestination', label: 'Dream travel destination', placeholder: 'Custom destination, e.g. Paris in winter', type: 'choice-text', options: [
+        { value: 'Paris', label: 'Paris' },
+        { value: 'Japan', label: 'Japan' },
+        { value: 'Kerala', label: 'Kerala' },
+        { value: 'Dubai', label: 'Dubai' },
+        { value: 'Maldives', label: 'Maldives' },
+        { value: 'New York', label: 'New York' },
+      ] },
+      { key: 'favoriteGame', label: 'Favorite game', placeholder: 'Custom game, e.g. badminton, chess, BGMI', type: 'choice-text', options: [
+        { value: 'chess', label: 'Chess' },
+        { value: 'cricket', label: 'Cricket' },
+        { value: 'badminton', label: 'Badminton' },
+        { value: 'football', label: 'Football' },
+        { value: 'carrom', label: 'Carrom' },
+        { value: 'BGMI', label: 'BGMI' },
+      ] },
       { key: 'favoriteQuote', label: 'A quote they love', placeholder: 'e.g. "Be the change you wish to see"', type: 'text', maxLength: 300 },
     ],
   },
@@ -107,12 +167,12 @@ export const FORM_STEPS: FormStep[] = [
   // ── Step 5: Your letter ─────────────────────────────
   {
     id: 'letter',
-    title: 'Write your letter',
-    subtitle: 'Your words, in your voice. The AI will only lightly format this — never rewrite it.',
+    title: 'Share what you feel',
+    subtitle: 'Give us the meaning. Our storyteller will shape it into something beautifully expressed.',
     icon: Heart,
     accentColor: 'var(--accent-rose)',
     fields: [
-      { key: 'personalLetter', label: 'Your personal letter', placeholder: 'Dear [name],\n\nI wanted to tell you...\n\nFrom my heart to yours,\n[your name]', type: 'textarea', maxLength: 5000, helperText: 'This appears as-is in the greeting. Write from the heart — there\'s no wrong way.' },
+      { key: 'personalLetter', label: 'What do you want them to feel?', placeholder: 'Share the thoughts, promises, or wishes you want the greeting to convey...', type: 'textarea', maxLength: 5000, helperText: 'We will re-author your notes with warmth and polish — they will not be copied word for word.' },
     ],
   },
 
@@ -137,6 +197,7 @@ export const FORM_STEPS: FormStep[] = [
     accentColor: 'var(--accent-purple)',
     fields: [
       { key: 'photos', label: 'Photos', type: 'photos', helperText: 'Upload up to 20 photos. Square or portrait work best.' },
+      { key: 'backgroundMusic', label: 'Background music link', placeholder: 'https://example.com/song.mp3, Spotify, or YouTube', type: 'text', helperText: 'Optional. Direct audio links can play in the greeting; Spotify and YouTube links open an embedded player.' },
       { key: 'mediaConsent', label: 'I confirm I have the rights to share these photos, videos, and music', type: 'checkbox', required: true },
     ],
   },
@@ -181,6 +242,7 @@ export const FORM_STEPS: FormStep[] = [
     icon: Send,
     accentColor: 'var(--accent-blue)',
     fields: [
+      { key: 'senderName', label: 'Your name', placeholder: 'How should the greeting be signed?', type: 'text', required: true, helperText: 'Shown delicately at the end as the presenter' },
       { key: 'additionalNotes', label: 'Anything else the AI should know?', placeholder: 'e.g. They love cats, mention their dog Max, avoid mentioning their ex...', type: 'textarea', maxLength: 1000, helperText: 'Optional but helps the AI nail the details' },
       { key: 'deviceTarget', label: 'Primary device for viewing', type: 'option-cards', options: [
         { value: 'mobile', label: 'Mobile', emoji: '📱' },

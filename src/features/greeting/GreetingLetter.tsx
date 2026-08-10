@@ -11,9 +11,9 @@ export function GreetingLetter({ data }: GreetingLetterProps) {
   if (!data.letter) return null;
 
   return (
-    <section className="relative mx-auto max-w-2xl px-6 py-24 sm:py-40">
+    <section className="greeting-section relative py-20 sm:py-36">
       <Reveal direction="up" duration={0.8} className="relative z-10">
-        <div className="rounded-[var(--radius-lg)] border border-glass-border bg-glass-bg p-8 shadow-2xl backdrop-blur-2xl sm:p-16">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-glass-border bg-glass-bg p-8 text-center shadow-2xl backdrop-blur-2xl sm:p-14 md:p-16">
           <p 
             className="whitespace-pre-wrap text-lg font-light leading-relaxed text-foreground sm:text-xl sm:leading-loose"
             style={{ fontFamily: 'var(--font-display)' }}
@@ -22,7 +22,7 @@ export function GreetingLetter({ data }: GreetingLetterProps) {
           </p>
 
           {data.closingMessage && (
-            <div className="mt-12 text-right">
+            <div className="mt-12 text-center">
               <p className="text-xl font-medium italic text-fg-secondary">
                 {data.closingMessage}
               </p>

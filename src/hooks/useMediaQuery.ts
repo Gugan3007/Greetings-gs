@@ -1,23 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
+
+const subscribeStatic = () => () => undefined;
 
 /**
  * Hook to detect media query matches reactively.
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    const mql = window.matchMedia(query);
-    setMatches(mql.matches);
-
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
+  const subscribe = useCallback((notify: () => void) => {
+    const media = window.matchMedia(query);
+    media.addEventListener('change', notify);
+    return () => media.removeEventListener('change', notify);
   }, [query]);
 
-  return matches;
+  const getSnapshot = useCallback(() => window.matchMedia(query).matches, [query]);
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
 
 /**
@@ -32,4 +30,13 @@ export function useFinePointer(): boolean {
  */
 export function useIsMobile(): boolean {
   return useMediaQuery('(max-width: 768px)');
+}
+
+/** Safari receives a lighter interaction path for reliable 60fps scrolling. */
+export function useIsSafari(): boolean {
+  return useSyncExternalStore(
+    subscribeStatic,
+    () => /^((?!chrome|chromium|android).)*safari/i.test(navigator.userAgent),
+    () => false
+  );
 }

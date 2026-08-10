@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { useFinePointer } from '@/hooks/useMediaQuery';
+import { useFinePointer, useIsSafari } from '@/hooks/useMediaQuery';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 type CursorVariant = 'default' | 'link' | 'button' | 'text' | 'image';
@@ -14,6 +14,7 @@ type CursorVariant = 'default' | 'link' | 'button' | 'text' | 'image';
  */
 export function CustomCursor() {
   const hasFine = useFinePointer();
+  const isSafari = useIsSafari();
   const prefersReduced = useReducedMotion();
   const [variant, setVariant] = useState<CursorVariant>('default');
   const [isVisible, setIsVisible] = useState(false);
@@ -42,7 +43,7 @@ export function CustomCursor() {
   }, []);
 
   useEffect(() => {
-    if (!hasFine || prefersReduced) return;
+    if (!hasFine || prefersReduced || isSafari) return;
 
     // Hide default cursor globally
     document.body.style.cursor = 'none';
@@ -89,10 +90,10 @@ export function CustomCursor() {
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('mouseover', handleElementHover);
     };
-  }, [hasFine, prefersReduced, handleMouseMove, handleMouseLeave, handleMouseEnter]);
+  }, [hasFine, prefersReduced, isSafari, handleMouseMove, handleMouseLeave, handleMouseEnter]);
 
   // Don't render on touch devices or reduced motion
-  if (!hasFine || prefersReduced) return null;
+  if (!hasFine || prefersReduced || isSafari) return null;
 
   const cursorSize = {
     default: 12,
@@ -108,7 +109,7 @@ export function CustomCursor() {
     <>
       {/* Main cursor dot */}
       <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-[10000] mix-blend-difference"
+        className="custom-cursor-layer pointer-events-none fixed top-0 left-0 z-[10000] mix-blend-difference"
         style={{
           x: cursorX,
           y: cursorY,
@@ -148,7 +149,7 @@ export function CustomCursor() {
       {/* Trail / glow */}
       <motion.div
         ref={trailRef}
-        className="pointer-events-none fixed top-0 left-0 z-[9999]"
+        className="custom-cursor-layer pointer-events-none fixed top-0 left-0 z-[9999]"
         style={{
           x: trailX,
           y: trailY,

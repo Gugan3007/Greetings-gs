@@ -13,7 +13,7 @@ export function GreetingTimeline({ data }: GreetingTimelineProps) {
   if (milestones.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-24 sm:py-32">
+    <section className="greeting-section py-20 sm:py-32">
       <Reveal direction="up">
         <h2 
           className="mb-20 text-center text-4xl font-bold sm:text-5xl"
@@ -23,7 +23,7 @@ export function GreetingTimeline({ data }: GreetingTimelineProps) {
         </h2>
       </Reveal>
 
-      <div className="relative">
+      <div className="relative mx-auto max-w-4xl">
         {/* Vertical Line */}
         <div className="absolute left-4 top-0 bottom-0 w-px bg-glass-border sm:left-1/2 sm:-ml-px" />
 
